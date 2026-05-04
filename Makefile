@@ -1,12 +1,10 @@
 CC = gcc
 CXX = g++
 
-RAYLIB_INCLUDE = -I./raylib/include
-RAYLIB_LIB = -L./raylib/lib
-RAYLIB_FLAGS = $(RAYLIB_LIB) -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+RAYLIB_FLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 CFLAGS = -Wall -Wextra -I./shared -g -pthread
-CXXFLAGS = -Wall -Wextra -I./shared $(RAYLIB_INCLUDE) -g -pthread -std=c++17
+CXXFLAGS = -Wall -Wextra -I./shared -g -pthread -std=c++17
 
 SERVER_SRCS = $(wildcard server/*.c)
 CLIENT_SRCS = $(wildcard client/*.cpp)
@@ -33,7 +31,6 @@ server/%.o: server/%.c
 
 client/%.o: client/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
 
 clean:
 	rm -f server/*.o client/*.o
