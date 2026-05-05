@@ -11,7 +11,7 @@ AppState MenuScreen::update(){
     if (IsKeyPressed(KEY_ENTER)){
         switch (selectedOption){
             case 0:
-                return AppState::IN_GAME;
+                return AppState::CONNECTING;
                 break;
             case 1:   
                 return AppState::EXIT;      
