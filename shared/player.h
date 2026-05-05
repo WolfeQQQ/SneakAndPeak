@@ -1,13 +1,13 @@
 #pragma once
 
-struct ClientInput {
-    bool up;
-    bool down;
-    bool right;
-    bool left;
-    bool shift;
-    //bool e_key;
-    };
+// struct ClientInput {
+//     bool up;
+//     bool down;
+//     bool right;
+//     bool left;
+//     bool shift;
+//     //bool e_key;
+//     };
 
 class player
 {   
@@ -33,6 +33,7 @@ public:
     float getStamina() const;
     float getAbilityCooldown() const;
     int getSpeed() const;
+    int getId() const;
     bool getIsCaught() const;
     bool getIsSeeker() const;
     bool getIsConnected() const;
@@ -47,12 +48,15 @@ public:
     void setIsCaught(bool changedCaught);
     void setIsSeeker(bool changedSeeker);
     void setIsConnected(bool changedConnectec);
+    void setId(int newId);
+    void setInput(ClientInput& newInput);
 
 
 private:
     //Player Stats
     float x;
     float y;
+    int id;
     int speed;
     float stamina;
     bool isCaught;

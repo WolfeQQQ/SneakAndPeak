@@ -33,6 +33,9 @@ float player::getStamina() const {
 int player::getSpeed() const {
     return this->speed;
 }
+int player::getId() const {
+    return this->id;
+}
 bool player::getIsCaught() const {
     return this->isCaught;
 }
@@ -63,6 +66,9 @@ void player::setAbilityCooldown(float newAbilityCooldown) {
 void player::setSpeed(int newSpeed) {
     this->speed = newSpeed;
 }
+void player::setId(int newId){
+    this->id = newId;
+}
 void player::setIsCaught(bool newCaught) {
     this->isCaught = newCaught;
 }
@@ -71,4 +77,7 @@ void player::setIsSeeker(bool newSeeker) {
 }
 void player::setIsConnected(bool newConnected) {
     this->isConnected = newConnected;
+}
+void player::setInput(ClientInput& newInput) {
+    this->input = newInput;
 }

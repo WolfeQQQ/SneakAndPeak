@@ -6,11 +6,13 @@
 
 #include "../shared/contstants.h"
 #include "../shared/player.h"
+#include "gameLogic.h"
 
 class GameServer {
 private:
     int listenSocket;
     bool isRunning;
+    gameLogic logic;
     
     std::mutex stateMutex;
     
@@ -18,13 +20,14 @@ private:
     player players[MAX_CLIENTS];
 
     //list of keys from clients
-    ClientInput clientInputs[MAX_CLIENTS];
+    player::ClientInput clientInputs[MAX_CLIENTS];
     
 
     int clientSockets[MAX_CLIENTS];
 
     void HandleNewConnection(int clientSock);
     void ClientListener(int playerId, int sock);
+    void GameUpdateLoop();
 
 public:
     GameServer();
@@ -36,7 +39,7 @@ public:
     //Allows to get a pointer to the players so he can count collisions
     player* getPlayers() { return players; }
     //Allows to get a pointer to the input list
-    ClientInput* getInputs() { return clientInputs; }
+    player::ClientInput* getInputs() { return clientInputs; }
     //Allows to manually trigger the sending of packets to all players
     void StateToUpload();
     //Allows to block the server while it computes something itself (thread safety)
