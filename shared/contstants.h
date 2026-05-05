@@ -1,23 +1,3 @@
-<<<<<<< HEAD
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
-
-#define SERVER_PORT 5000
-#define MAX_CLIENTS 4
-
-#define TICK_RATE 60
-#define TICK_DELAY_MS (1000 / TICK_RATE)
-
-#define PHASE_1_DURATION_SEC 30.0f
-#define PHASE_2_DURATION_SEC 180.0f
-#define GHOST_TIMEOUT_SEC 15.0f
-
-#define MAP_WIDTH 40
-#define MAP_HEIGHT 30
-#define TILE_SIZE 32.0f
-
-#endif
-=======
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
@@ -39,4 +19,3 @@
 #define PLAYER_LENGTH 30
 
 #endif
->>>>>>> b75cba87813cb24104d286244f27e2026e1c7c22
