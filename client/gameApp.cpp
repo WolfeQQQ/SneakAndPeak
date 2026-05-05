@@ -1,6 +1,7 @@
 #include "gameApp.h"
 #include "menuScreen.h"
 #include "inGameScreen.h"
+#include "../shared/contstants.h"
 
 // another screens
 
@@ -56,13 +57,24 @@ void GameApp::changeState(AppState newState){
             currentScreen = std::make_unique<MenuScreen>();
             break;
         case AppState::CONNECTING:
-            // currentScreen = std::make_unique<ConnectingScreen>();
+
+            //currentScreen = std::make_unique<ConnectingScreen>();
+
+            if(networkClient.ConnectToServer("127.0.0.1", 5000)==true) //change to constants.h port
+            { //MOVE TO CONNECTING SCREEN
+                changeState(AppState::IN_GAME);
+            } 
+            else {
+                changeState(AppState::MAIN_MENU);
+                //changeState(AppState::DISCONNECTED);
+            }
             break;
+
         case AppState::LOBBY:
             // currentScreen = std::make_unique<LobbyScreen>();
             break;
         case AppState::IN_GAME:
-            currentScreen = std::make_unique<InGameScreen>();
+            currentScreen = std::make_unique<InGameScreen>(&networkClient);
             break;
         case AppState::DISCONNECTED:
             // currentScreen = std::make_unique<DisconnectedScreen>();

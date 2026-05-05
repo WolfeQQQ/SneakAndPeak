@@ -3,6 +3,7 @@
 #include "appState.h"
 #include "screen.h"
 #include <memory>
+#include "network.h"
 
 class GameApp {
 
@@ -17,5 +18,5 @@ class GameApp {
         void update();
         void draw();
         void changeState(AppState newState); // Function to change the current state
-
+        Network networkClient;
 };
