@@ -1,5 +1,6 @@
 #include "gameLogic.h"
 #include "../shared/player.h"
+#include "../shared/contstants.h"
 
 gameLogic::gameLogic()
 {
@@ -40,10 +41,49 @@ void gameLogic::playerMove(player& currentPlayer) {
 
 //collision function
 void gameLogic::collision(player& currentPlayer, player players[4], int oldX, int oldY) {
-    for(int i = 0; i < 3; i++) {
+    player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
+    for(int i = 0; i < 4; i++) {
         if(&currentPlayer == &players[i]) continue;
-        
 
+        //variables for calculating edge points
+        float widthPoint = PLAYER_WIDTH/2;
+        float lengthPoint = PLAYER_LENGTH/2;
+        float currentX = currentPlayer.getX(), currentY = currentPlayer.getY();
+        float otherX = players[i].getX(), otherY = players[i].getY();
+
+        //AABB algorithm calculations
+        if ((currentX - widthPoint) > (otherX + widthPoint)) return;
+        if ((currentX + widthPoint) < (otherX - widthPoint)) return;
+        if ((currentY - lengthPoint) > (otherY + lengthPoint)) return;
+        if ((currentY + lengthPoint) < (otherY - lengthPoint)) return;
+
+        //collision handling
+        if(currentPlayer.getIsSeeker() == true) {
+            players[i].setIsCaught(true);
+            return;
+        }
+        if(players[i].getIsSeeker() == true) {
+            currentPlayer.setIsCaught(true);
+            return;
+        }
+
+        //Adjusting current player position based on AABB algorithm calculations
+        if(currentPlayerInput.right == true) {
+            int diffrence = (currentX + widthPoint) - (otherX - widthPoint) - 1;
+            currentPlayer.setX(-diffrence);
+        }
+        if(currentPlayerInput.left == true) {
+            int diffrence = (otherX + widthPoint) - (currentX - widthPoint) + 1;
+            currentPlayer.setX(diffrence);
+        }
+        if(currentPlayerInput.down == true) {
+            int diffrence = (currentY + lengthPoint) - (otherY - lengthPoint) - 1;
+            currentPlayer.setX(-diffrence);
+        }
+        if(currentPlayerInput.up == true) {
+            int diffrence = (otherY + lengthPoint) - (currentY - lengthPoint) + 1;
+            currentPlayer.setX(diffrence);
+        }
     }
 }
 
