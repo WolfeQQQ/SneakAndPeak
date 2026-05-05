@@ -1,5 +1,5 @@
 #pragma once
-#include "objectClasses/player.h"
+#include "../shared/player.h"
 
 class gameLogic
 {
@@ -8,6 +8,6 @@ private:
 public:
     gameLogic();
     ~gameLogic();
-    void gameTick(player players[4]);
-    void playerMove(player currentPlayer);
+    void gameTick(player);
+    void playerMove(player);
 };
