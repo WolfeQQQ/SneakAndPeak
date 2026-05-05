@@ -28,6 +28,9 @@ void GameServer::Start(){
     bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     listen(listenSocket,10);
     isRunning = true;
+
+    std::thread(&GameServer::GameUpdateLoop, this).detach();
+
     std::cout << "[Serwer] ready. Waiting for calls";
 
     while(isRunning){
@@ -53,6 +56,10 @@ void GameServer::HandleNewConnection(int clientSock){
             assignedId = i;
             clientSockets[i] = clientSock;
             players[i].setIsConnected(true);
+            players[i].setId(i);
+
+            send(clientSock, &assignedId, sizeof(int), 0);
+
             break;
         }
         
@@ -69,9 +76,9 @@ void GameServer::HandleNewConnection(int clientSock){
 
 //Listens to data provided by client
 void GameServer::ClientListener(int playerId, int sock){
-    ClientInput tempinput;
+    player::ClientInput tempinput;
     int readSize;
-    while((readSize = recv(sock, &tempinput, sizeof(ClientInput), 0)) > 0){
+    while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), 0)) > 0){
          std::lock_guard<std::mutex> lock(stateMutex);
          clientInputs[playerId] = tempinput;
     }
@@ -80,13 +87,34 @@ void GameServer::ClientListener(int playerId, int sock){
         std::lock_guard<std::mutex> lock(stateMutex);
         players[playerId].setIsConnected(false);
         clientSockets[playerId] = 0;
-        std::memset(&clientInputs[playerId], 0, sizeof(ClientInput));
+        std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
         std::cout << "Player" << playerId << "left the game. \n";
     }
     close(sock);
 }
 
-//To dla kubara
+void GameServer::GameUpdateLoop() {
+    while(isRunning) {
+        auto startTime = std::chrono::steady_clock::now();
+        {
+            std::lock_guard<std::mutex> lock(stateMutex);
+            
+            for(int i = 0; i < MAX_CLIENTS; i++) {
+                if(players[i].getIsConnected()) {
+                    players[i].setInput(clientInputs[i]);
+                }
+            }
+
+            logic.gameTick(players);
+        }
+
+        StateToUpload();
+        auto endTime = std::chrono::steady_clock::now();
+        auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        std::this_thread::sleep_for(std::chrono::milliseconds(TICK_DELAY_MS) - frameDuration);
+    }
+}
+
 //server->StateToUpload()
 void GameServer::StateToUpload(){
     std::lock_guard<std::mutex> lock(stateMutex);
