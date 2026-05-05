@@ -2,15 +2,21 @@
 
 
 //Constructor, Destructor
-player::player()
-{
+player::player() {
+    this->x = 640.0f;      // Ustaw graczy na środku mapy
+    this->y = 360.0f;
+    this->speed = 5;       // Nadaj im jakąś początkową prędkość!
+    this->stamina = 100.0f;
     this->isConnected = false;
+    this->isCaught = false;
+    this->isSeeker = false;
+    this->abilityCooldown = 0.0f;
+
     this->input.up = false;
     this->input.down = false;
     this->input.left = false;
     this->input.right = false;
     this->input.shift = false;
-    //this->input.eKey = false;
 }
 
 player::~player()
@@ -52,10 +58,10 @@ player::ClientInput player::getClientInput() const {
 
 //Setters
 void player::setX(float newX) {
-    this->x += newX;
+    this->x = newX;
 }
 void player::setY(float newY) {
-    this->y += newY;
+    this->y = newY;
 }
 void player::setStamina(float newStamina) {
     this->stamina = newStamina;

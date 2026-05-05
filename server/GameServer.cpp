@@ -58,6 +58,17 @@ void GameServer::HandleNewConnection(int clientSock){
             players[i].setIsConnected(true);
             players[i].setId(i);
 
+
+            players[i].setIsConnected(true);
+            players[i].setId(i);
+            players[i].setX(100.0f); 
+            players[i].setY(100.0f);
+            players[i].setSpeed(4);
+            players[i].setStamina(100.0f);
+            players[i].setIsCaught(false);
+            players[i].setIsSeeker(false);
+            
+
             send(clientSock, &assignedId, sizeof(int), 0);
 
             break;
@@ -78,7 +89,7 @@ void GameServer::HandleNewConnection(int clientSock){
 void GameServer::ClientListener(int playerId, int sock){
     player::ClientInput tempinput;
     int readSize;
-    while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), 0)) > 0){
+    while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), MSG_WAITALL)) > 0){
          std::lock_guard<std::mutex> lock(stateMutex);
          clientInputs[playerId] = tempinput;
     }
