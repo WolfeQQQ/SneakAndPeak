@@ -1,7 +1,45 @@
 #pragma once
 
 class player
-{
+{   
+public:
+    //Constructor, Deconstructor
+    player();
+    ~player();
+
+    //Client Input Definition
+    struct ClientInput
+    {
+        bool up;
+        bool down;
+        bool right;
+        bool left;
+        bool shift;
+        //bool eKey;
+    };
+
+    //Getters
+    float getX() const;
+    float getY() const;
+    float getStamina() const;
+    float getAbilityCooldown() const;
+    int getSpeed() const;
+    bool getIsCaught() const;
+    bool getIsSeeker() const;
+    bool getIsConnected() const;
+    ClientInput getClientInput() const;
+
+    //Setters
+    void setX(float newX);
+    void setY(float newY);
+    void setStamina(float newStamina);
+    void setAbilityCooldown(float newAbilityCooldown);
+    void setSpeed(int newSpeed);
+    void setIsCaught(bool changedCaught);
+    void setIsSeeker(bool changedSeeker);
+    void setIsConnected(bool changedConnectec);
+
+
 private:
     //Player Stats
     float x;
@@ -14,38 +52,6 @@ private:
     float abilityCooldown;
 
     //Client Input
-    bool up;
-    bool down;
-    bool right;
-    bool left;
-    bool shift;
-    //bool e_key;
-    
-public:
-    //Constructor, Deconstructor
-    player();
-    ~player();
+    ClientInput input;
 
-    //Getters
-    float getX() const;
-    float getY() const;
-    float getStamina() const;
-    float getAbilityCooldown() const;
-    int getSpeed() const;
-    bool getIsCaught() const;
-    bool getIsSeeker() const;
-    bool getIsConnected() const;
-
-    //Setters
-    float setX(float);
-    float setY(float);
-    float setStamina(float);
-    float setAbilityCooldown(float);
-    int setSpeed(int);
-    bool setIsCaught(bool);
-    bool setIsSeeker(bool);
-    bool setIsConnected(bool);
-
-    //methods
-    bool checkCollision(player, player);
 };

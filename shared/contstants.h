@@ -15,4 +15,7 @@
 #define MAP_HEIGHT 30
 #define TILE_SIZE 32.0f
 
+#define PLAYER_WIDTH 20
+#define PLAYER_LENGTH 30
+
 #endif
