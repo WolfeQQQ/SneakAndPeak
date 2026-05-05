@@ -37,14 +37,14 @@ public:
     bool getIsConnected() const;
 
     //Setters
-    float setX(float);
-    float setY(float);
-    float setStamina(float);
-    float setAbilityCooldown(float);
-    int setSpeed(int);
-    bool setIsCaught(bool);
-    bool setIsSeeker(bool);
-    bool setIsConnected(bool);
+    void setX(float);
+    void setY(float);
+    void setStamina(float);
+    void setAbilityCooldown(float);
+    void setSpeed(int);
+    void setIsCaught(bool);
+    void setIsSeeker(bool);
+    void setIsConnected(bool);
 
     //methods
     bool checkCollision(player, player);
