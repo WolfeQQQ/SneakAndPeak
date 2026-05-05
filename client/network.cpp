@@ -30,6 +30,16 @@ bool Network::ConnectToServer(const std::string& ip, int port){
     if(connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
         return false;
     }
+
+    int myId = -1;
+    if (recv(sock, &myId, sizeof(int), 0) <= 0) {
+        std::cerr << "[Network] Blad pobierania ID gracza od serwera!\n";
+        close(sock);
+        sock = -1;
+        return false;
+    }
+
+    std::cout << "[Network] Polaczono! Moje ID to: " << myId << "\n";
     
     connected = true;
 
