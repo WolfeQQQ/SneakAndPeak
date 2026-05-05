@@ -11,7 +11,7 @@ AppState MenuScreen::update(){
     if (IsKeyPressed(KEY_ENTER)){
         switch (selectedOption){
             case 0:
-                return AppState::CONNECTING;
+                return AppState::IN_GAME;
                 break;
             case 1:   
                 return AppState::EXIT;      
@@ -23,16 +23,16 @@ AppState MenuScreen::update(){
 }
 
 void MenuScreen::draw(){
-    Color startColor = (selectedOption == 0) ? DARKGRAY : LIGHTGRAY; 
-    Color exitColor = (selectedOption == 1) ? DARKGRAY : LIGHTGRAY; 
+    Color startColor = (selectedOption == 0) ? LIGHTGRAY : DARKGRAY; 
+    Color exitColor = (selectedOption == 1) ? LIGHTGRAY : DARKGRAY; 
 
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
     
-    DrawText("SNEAK&PEAK", screenWidth / 2 - 200, screenHeight / 2 - 200, 50, WHITE); // TODO - center text properly
-    DrawRectangle(screenWidth / 2 - 100, 300, 200, 50, startColor); 
-    DrawText("Start Game", screenWidth / 2 - 90, 310, 20, BLACK);   // TODO -  Buttons too...
-    DrawRectangle(screenWidth / 2 - 100, 400, 200, 50, exitColor);
-    DrawText("Exit", screenWidth / 2 - 80, 410, 20, BLACK);
+    DrawText("SNEAK&PEAK", 100, screenHeight / 2 - 200, 100, WHITE); // TODO - center text properly
+    DrawRectangle(100, 300, 200, 50, startColor); 
+    DrawText("Start Game", 100, 310, 20, BLACK);   // TODO -  Buttons too...
+    DrawRectangle(100, 400, 200, 50, exitColor);
+    DrawText("Exit", 100, 410, 20, BLACK);
 
 }
