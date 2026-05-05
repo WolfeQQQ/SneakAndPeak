@@ -1,5 +1,6 @@
 #include "gameApp.h"
 #include "menuScreen.h"
+#include "inGameScreen.h"
 
 // another screens
 
@@ -13,6 +14,7 @@ Handles the current state of the application and transitions beetween different 
 GameApp::GameApp() {
     InitWindow(1280,720, "Sneak&Peak"); // Initialize the window with a title
     SetTargetFPS(60);
+    SetExitKey(0);
     changeState(AppState::MAIN_MENU); // Start with the main menu
 }
 
@@ -60,7 +62,7 @@ void GameApp::changeState(AppState newState){
             // currentScreen = std::make_unique<LobbyScreen>();
             break;
         case AppState::IN_GAME:
-            // currentScreen = std::make_unique<InGameScreen>();
+            currentScreen = std::make_unique<InGameScreen>();
             break;
         case AppState::DISCONNECTED:
             // currentScreen = std::make_unique<DisconnectedScreen>();

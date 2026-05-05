@@ -45,27 +45,27 @@ bool player::getIsConnected() const {
 
 
 //Setters
-float player::setX(float newX) {
+void player::setX(float newX) {
     this->x = newX;
 }
-float player::setY(float newY) {
+void player::setY(float newY) {
     this->y = newY;
 }
-float player::setStamina(float newStamina) {
+void player::setStamina(float newStamina) {
     this->stamina = newStamina;
 }
-float player::setAbilityCooldown(float newAbilityCooldown) {
+void player::setAbilityCooldown(float newAbilityCooldown) {
     this->abilityCooldown = newAbilityCooldown;
 }
-int player::setSpeed(int newSpeed) {
+void player::setSpeed(int newSpeed) {
     this->speed = newSpeed;
 }
-bool player::setIsCaught(bool newCaught) {
+void player::setIsCaught(bool newCaught) {
     this->isCaught = newCaught;
 }
-bool player::setIsSeeker(bool newSeeker) {
+void player::setIsSeeker(bool newSeeker) {
     this->isSeeker = newSeeker;
 }
-bool player::setIsConnected(bool newConnected) {
+void player::setIsConnected(bool newConnected) {
     this->isConnected = newConnected;
 }
