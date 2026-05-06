@@ -63,7 +63,7 @@ void GameServer::HandleNewConnection(int clientSock){
             players[i].setId(i);
             players[i].setX(100.0f); 
             players[i].setY(100.0f);
-            players[i].setSpeed(4);
+            players[i].setSpeed(4.0f);
             players[i].setStamina(100.0f);
             players[i].setIsCaught(false);
             players[i].setIsSeeker(false);

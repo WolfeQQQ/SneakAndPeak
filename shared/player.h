@@ -32,7 +32,7 @@ public:
     float getY() const;
     float getStamina() const;
     float getAbilityCooldown() const;
-    int getSpeed() const;
+    float getSpeed() const;
     int getId() const;
     bool getIsCaught() const;
     bool getIsSeeker() const;
@@ -44,7 +44,7 @@ public:
     void setY(float newY);
     void setStamina(float newStamina);
     void setAbilityCooldown(float newAbilityCooldown);
-    void setSpeed(int newSpeed);
+    void setSpeed(float newSpeed);
     void setIsCaught(bool changedCaught);
     void setIsSeeker(bool changedSeeker);
     void setIsConnected(bool changedConnectec);
@@ -57,7 +57,7 @@ private:
     float x;
     float y;
     int id;
-    int speed;
+    float speed;
     float stamina;
     bool isCaught;
     bool isSeeker;

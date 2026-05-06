@@ -1,4 +1,5 @@
 #include "inGameScreen.h"
+#include <cmath>
 
 InGameScreen::InGameScreen(Network* networkClient, int playerId) {
     network = networkClient;
@@ -36,7 +37,7 @@ AppState InGameScreen::update(){
         }
     }
 
-    camera.target = (Vector2){myPlayer.getX() + 10, myPlayer.getY()+10};
+    camera.target = (Vector2){std::round(myPlayer.getX()) + 10, std::round(myPlayer.getY())+10};
 
     // if(IsKeyPressed(KEY_ESCAPE)){
     //     return AppState::MAIN_MENU;
@@ -51,9 +52,9 @@ void InGameScreen::draw(){
         for(int i = 0; i<4; i++){
             if(players[i].getIsConnected()){
                 Color playerColor = players[i].getIsSeeker() ? RED : BLUE;
-                DrawRectangle(players[i].getX(), players[i].getY(), 20, 30, playerColor);
+                DrawRectangle(std::round(players[i].getX()), std::round(players[i].getY()), 20, 30, playerColor);
 
-                DrawText(std::to_string(players[i].getId()).c_str(), players[i].getX(), players[i].getY() - 20, 10, WHITE);
+                DrawText(std::to_string(players[i].getId()).c_str(), std::round(players[i].getX()), std::round(players[i].getY()) - 20, 10, WHITE);
             }
         }
     EndMode2D();

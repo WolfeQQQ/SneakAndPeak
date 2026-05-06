@@ -36,7 +36,7 @@ float player::getAbilityCooldown() const {
 float player::getStamina() const {
     return this->stamina;
 }
-int player::getSpeed() const {
+float player::getSpeed() const {
     return this->speed;
 }
 int player::getId() const {
@@ -69,7 +69,7 @@ void player::setStamina(float newStamina) {
 void player::setAbilityCooldown(float newAbilityCooldown) {
     this->abilityCooldown = newAbilityCooldown;
 }
-void player::setSpeed(int newSpeed) {
+void player::setSpeed(float newSpeed) {
     this->speed = newSpeed;
 }
 void player::setId(int newId){

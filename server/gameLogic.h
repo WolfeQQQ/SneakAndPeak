@@ -9,6 +9,7 @@ public:
     void gameTick(player players[4]);
 
 private:
-    void playerMove(player& currentPlayer);
-    void collision(player& currentPlayer, player players[4], int oldX, int oldY);
+    void playerMove(player& currentPlayer, player players[4]);
+    void collision(player& currentPlayer, player players[4], int directionFlag); 
+    //collision -> directionFlag: 0 - up, 1 - down, 2 - right, 3 - left
 };
