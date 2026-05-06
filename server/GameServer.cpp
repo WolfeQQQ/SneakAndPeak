@@ -67,6 +67,7 @@ void GameServer::HandleNewConnection(int clientSock){
             players[i].setStamina(100.0f);
             players[i].setIsCaught(false);
             players[i].setIsSeeker(false);
+            players[i].setIsRunning(false);
             
 
             send(clientSock, &assignedId, sizeof(int), 0);

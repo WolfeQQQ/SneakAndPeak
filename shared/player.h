@@ -37,6 +37,7 @@ public:
     bool getIsCaught() const;
     bool getIsSeeker() const;
     bool getIsConnected() const;
+    bool getIsRunning() const;
     ClientInput getClientInput() const;
 
     //Setters
@@ -48,6 +49,7 @@ public:
     void setIsCaught(bool changedCaught);
     void setIsSeeker(bool changedSeeker);
     void setIsConnected(bool changedConnectec);
+    void setIsRunning(bool changedRunning);
     void setId(int newId);
     void setInput(ClientInput& newInput);
 
@@ -62,6 +64,7 @@ private:
     bool isCaught;
     bool isSeeker;
     bool isConnected;
+    bool isRunning;
     float abilityCooldown;
 
     //Client Input

@@ -6,17 +6,41 @@
 
 gameLogic::gameLogic()
 {
+    isStarted = false;
 }
 
 gameLogic::~gameLogic()
 {
 }
 
+//Getters
+float gameLogic::getGlobalTime() const {
+    return this->globalTime;
+}
+
 //Main server logic  
 void gameLogic::gameTick(player players[4]) {
+
+    //Game time start with first inicialization
+    auto currentTime = std::chrono::steady_clock::now();
+    if(isStarted == false) {
+        startTime = currentTime;
+        lastTime = startTime;
+        isStarted = true;
+        return;
+    }
+
+    //Game time calculations
+    std::chrono::duration<float> elapsed = currentTime - startTime;
+    globalTime = elapsed.count();
+    std::chrono::duration<float> frameDelta = currentTime - lastTime;
+    lastTime = currentTime;
+    float deltaTime = frameDelta.count();
+
     
     for(int i = 0; i < 4; i++) {
-        if(players[i].getIsConnected() == false) continue;
+        if(players[i].getIsConnected() == false || players[i].getIsCaught() == true) continue;
+        staminaHandler(players[i], deltaTime);
         playerMove(players[i], players);
     }
 }
@@ -118,7 +142,50 @@ void gameLogic::collision(player& currentPlayer, player players[4], int directio
     }
 }
 
+//players stamina handler
+void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
 
+    //if(currentPlayer.getIsSeeker() == false) return;
+
+    //variables
+    player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
+    float stamina = currentPlayer.getStamina();
+    float currentSpeed = currentPlayer.getSpeed();
+    std::cout << stamina << std::endl;
+    std::cout << currentSpeed << std::endl;
+
+    //stamina usage and regenration
+    if(currentPlayerInput.shift == true) {
+        if(stamina > 0.0f) {
+            float currentStamina = stamina - (DRAIN_RATE * deltaTime);
+            currentPlayer.setStamina(currentStamina);
+            if(currentPlayer.getIsRunning() == false) {
+                currentPlayer.setSpeed(currentSpeed * 2);
+                currentPlayer.setIsRunning(true);
+            }
+            return;
+        }
+        else {
+            if(currentPlayer.getIsRunning() == true) {
+                currentPlayer.setSpeed(currentSpeed / 2);
+                if(stamina < 0.0f) currentPlayer.setStamina(0.0f);
+                currentPlayer.setIsRunning(false);
+            }
+            return;
+        }
+    }
+    else {
+        if(stamina < MAX_STAMINA) {
+            float currentStamina = stamina + (DRAIN_RATE * deltaTime);
+            currentPlayer.setStamina(currentStamina);
+            return;
+        }
+        else {
+            currentPlayer.setStamina(MAX_STAMINA);
+            return;
+        }
+    }
+}
 
 
  

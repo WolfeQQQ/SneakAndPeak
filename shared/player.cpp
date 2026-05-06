@@ -10,6 +10,7 @@ player::player() {
     this->isConnected = false;
     this->isCaught = false;
     this->isSeeker = false;
+    this->isRunning = false;
     this->abilityCooldown = 0.0f;
 
     this->input.up = false;
@@ -51,6 +52,9 @@ bool player::getIsSeeker() const {
 bool player::getIsConnected() const {
     return this->isConnected;
 }
+bool player::getIsRunning() const {
+    return this->isRunning;
+}
 player::ClientInput player::getClientInput() const {
     return this->input;
 }
@@ -83,6 +87,9 @@ void player::setIsSeeker(bool newSeeker) {
 }
 void player::setIsConnected(bool newConnected) {
     this->isConnected = newConnected;
+}
+void player::setIsRunning(bool newRunning) {
+    this->isRunning = newRunning;
 }
 void player::setInput(ClientInput& newInput) {
     this->input = newInput;

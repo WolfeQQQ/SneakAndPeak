@@ -17,5 +17,7 @@
 
 #define PLAYER_WIDTH 20
 #define PLAYER_LENGTH 30
+#define DRAIN_RATE 20.0f
+#define MAX_STAMINA 100.0f
 
 #endif
