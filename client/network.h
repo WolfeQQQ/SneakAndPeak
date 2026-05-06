@@ -12,7 +12,7 @@ class Network{
         Network();
         ~Network();
 
-        bool ConnectToServer(const std::string& ip, int port);
+        bool ConnectToServer(const std::string& ip, int port, int *playerId);
         void Disconnect();
         bool IsConnected() const { return connected; }
         void SendInput(player::ClientInput input);

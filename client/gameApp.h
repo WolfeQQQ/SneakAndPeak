@@ -19,4 +19,5 @@ class GameApp {
         void draw();
         void changeState(AppState newState); // Function to change the current state
         Network networkClient;
+        int playerId;
 };
