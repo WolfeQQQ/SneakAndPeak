@@ -1,18 +1,16 @@
 #include "inGameScreen.h"
 
-InGameScreen::InGameScreen(Network* networkClient) {
+InGameScreen::InGameScreen(Network* networkClient, int playerId) {
     network = networkClient;
 
-    myPlayer.setX(100);
-    myPlayer.setY(100);
-    myPlayer.setSpeed(4);
-    myPlayer.setStamina(100);
-
     camera = { 0 };
-    camera.target = (Vector2){myPlayer.getX()+10, myPlayer.getY()+10};
+    camera.target = (Vector2){0, 0};
     camera.offset = (Vector2){GetScreenWidth()/2.0f, GetScreenHeight()/2.0f};
     camera.rotation = 0.0f;
     camera.zoom = 1.5f;
+
+    this->playerId = playerId;
+
 }
 
 
@@ -27,10 +25,16 @@ AppState InGameScreen::update(){
     input.shift = IsKeyDown(KEY_LEFT_SHIFT);
     //input.eKey = IsKeyDown(KEY_E);
     
-
     network ->SendInput(input);
+
     network ->ReceiveState(players);
 
+    for (int i = 0; i < 4; i++){
+        if(players[i].getId() == this ->playerId){
+            myPlayer = players[i];
+            break;
+        }
+    }
 
     camera.target = (Vector2){myPlayer.getX() + 10, myPlayer.getY()+10};
 
@@ -47,9 +51,9 @@ void InGameScreen::draw(){
         for(int i = 0; i<4; i++){
             if(players[i].getIsConnected()){
                 Color playerColor = players[i].getIsSeeker() ? RED : BLUE;
-                DrawRectangle(players[i].getX(), players[i].getY(), 20, 20, playerColor);
+                DrawRectangle(players[i].getX(), players[i].getY(), 20, 30, playerColor);
 
-                //add a little number to show player index
+                DrawText(std::to_string(players[i].getId()).c_str(), players[i].getX(), players[i].getY() - 20, 10, WHITE);
             }
         }
     EndMode2D();
@@ -57,7 +61,6 @@ void InGameScreen::draw(){
         
     DrawText("Stamina: ", 10, 10, 20,WHITE);
     // DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
-        
     DrawRectangleLines(10,40, 200, 20, WHITE);
 
     
