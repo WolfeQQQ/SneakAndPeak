@@ -61,7 +61,7 @@ void InGameScreen::draw(){
         
         
     DrawText("Stamina: ", 10, 10, 20,WHITE);
-    // DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
+    DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
     DrawRectangleLines(10,40, 200, 20, WHITE);
 
     
