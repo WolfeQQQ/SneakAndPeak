@@ -14,7 +14,7 @@ Handles the current state of the application and transitions beetween different 
 
 GameApp::GameApp() {
     InitWindow(1280,720, "Sneak&Peak"); // Initialize the window with a title
-    SetTargetFPS(60);
+    //SetTargetFPS(60);
     SetExitKey(0);
     changeState(AppState::MAIN_MENU); // Start with the main menu
 }
@@ -60,7 +60,7 @@ void GameApp::changeState(AppState newState){
 
             //currentScreen = std::make_unique<ConnectingScreen>();
 
-            if(networkClient.ConnectToServer("127.0.0.1", 5000)==true) //change to constants.h port
+            if(networkClient.ConnectToServer("127.0.0.1", 5000, &playerId)==true) //change to constants.h port
             { //MOVE TO CONNECTING SCREEN
                 changeState(AppState::IN_GAME);
             } 
@@ -74,7 +74,7 @@ void GameApp::changeState(AppState newState){
             // currentScreen = std::make_unique<LobbyScreen>();
             break;
         case AppState::IN_GAME:
-            currentScreen = std::make_unique<InGameScreen>(&networkClient);
+            currentScreen = std::make_unique<InGameScreen>(&networkClient, playerId);
             break;
         case AppState::DISCONNECTED:
             // currentScreen = std::make_unique<DisconnectedScreen>();

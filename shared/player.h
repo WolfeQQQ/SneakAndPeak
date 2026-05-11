@@ -32,11 +32,12 @@ public:
     float getY() const;
     float getStamina() const;
     float getAbilityCooldown() const;
-    int getSpeed() const;
+    float getSpeed() const;
     int getId() const;
     bool getIsCaught() const;
     bool getIsSeeker() const;
     bool getIsConnected() const;
+    bool getIsRunning() const;
     ClientInput getClientInput() const;
 
     //Setters
@@ -44,10 +45,11 @@ public:
     void setY(float newY);
     void setStamina(float newStamina);
     void setAbilityCooldown(float newAbilityCooldown);
-    void setSpeed(int newSpeed);
+    void setSpeed(float newSpeed);
     void setIsCaught(bool changedCaught);
     void setIsSeeker(bool changedSeeker);
     void setIsConnected(bool changedConnectec);
+    void setIsRunning(bool changedRunning);
     void setId(int newId);
     void setInput(ClientInput& newInput);
 
@@ -57,11 +59,12 @@ private:
     float x;
     float y;
     int id;
-    int speed;
+    float speed;
     float stamina;
     bool isCaught;
     bool isSeeker;
     bool isConnected;
+    bool isRunning;
     float abilityCooldown;
 
     //Client Input

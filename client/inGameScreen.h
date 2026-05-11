@@ -10,8 +10,9 @@ class InGameScreen : public Screen {
         player myPlayer;
         player players[4]; 
         Network* network;
+        int playerId;
     public:
-        InGameScreen(Network* networkClient);
+        InGameScreen(Network* networkClient, int playerId);
         AppState update() override;
         void draw() override;
     

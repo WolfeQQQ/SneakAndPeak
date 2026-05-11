@@ -16,7 +16,7 @@ Network::~Network() {
     Disconnect();
 }
 
-bool Network::ConnectToServer(const std::string& ip, int port){
+bool Network::ConnectToServer(const std::string& ip, int port, int *playerId){
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     sockaddr_in serverAddr{};
@@ -32,6 +32,7 @@ bool Network::ConnectToServer(const std::string& ip, int port){
     }
 
     int myId = -1;
+    
     if (recv(sock, &myId, sizeof(int), 0) <= 0) {
         std::cerr << "[Network] Blad pobierania ID gracza od serwera!\n";
         close(sock);
@@ -39,6 +40,7 @@ bool Network::ConnectToServer(const std::string& ip, int port){
         return false;
     }
 
+    *playerId = myId;
     std::cout << "[Network] Polaczono! Moje ID to: " << myId << "\n";
     
     connected = true;

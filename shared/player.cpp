@@ -10,6 +10,7 @@ player::player() {
     this->isConnected = false;
     this->isCaught = false;
     this->isSeeker = false;
+    this->isRunning = false;
     this->abilityCooldown = 0.0f;
 
     this->input.up = false;
@@ -36,7 +37,7 @@ float player::getAbilityCooldown() const {
 float player::getStamina() const {
     return this->stamina;
 }
-int player::getSpeed() const {
+float player::getSpeed() const {
     return this->speed;
 }
 int player::getId() const {
@@ -50,6 +51,9 @@ bool player::getIsSeeker() const {
 }
 bool player::getIsConnected() const {
     return this->isConnected;
+}
+bool player::getIsRunning() const {
+    return this->isRunning;
 }
 player::ClientInput player::getClientInput() const {
     return this->input;
@@ -69,7 +73,7 @@ void player::setStamina(float newStamina) {
 void player::setAbilityCooldown(float newAbilityCooldown) {
     this->abilityCooldown = newAbilityCooldown;
 }
-void player::setSpeed(int newSpeed) {
+void player::setSpeed(float newSpeed) {
     this->speed = newSpeed;
 }
 void player::setId(int newId){
@@ -83,6 +87,9 @@ void player::setIsSeeker(bool newSeeker) {
 }
 void player::setIsConnected(bool newConnected) {
     this->isConnected = newConnected;
+}
+void player::setIsRunning(bool newRunning) {
+    this->isRunning = newRunning;
 }
 void player::setInput(ClientInput& newInput) {
     this->input = newInput;
