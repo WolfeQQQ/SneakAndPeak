@@ -13,11 +13,12 @@
 
 #define MAP_WIDTH 40
 #define MAP_HEIGHT 30
-#define TILE_SIZE 32.0f
+#define TILE_SIZE 36
 
 #define PLAYER_WIDTH 20
 #define PLAYER_LENGTH 30
-#define DRAIN_RATE 20.0f
+#define DRAIN_RATE 50.0f
+#define REGEN_RATE 20.0f
 #define MAX_STAMINA 100.0f
 
 #endif

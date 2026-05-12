@@ -117,7 +117,8 @@ void GameServer::GameUpdateLoop() {
                 }
             }
 
-            logic.gameTick(players);
+            bool toStop = logic.gameTick(players);
+            if(toStop) Stop();
         }
 
         StateToUpload();
