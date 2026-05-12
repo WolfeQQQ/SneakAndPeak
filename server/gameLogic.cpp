@@ -175,6 +175,10 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
         }
     }
     else {
+        if(currentPlayerInput.shift == false && currentPlayer.getIsRunning() == true) {
+            currentPlayer.setSpeed(currentSpeed / 2);
+            currentPlayer.setIsRunning(false);
+        }
         if(stamina < MAX_STAMINA) {
             float currentStamina = stamina + (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
