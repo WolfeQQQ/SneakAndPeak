@@ -12,6 +12,7 @@ InGameScreen::InGameScreen(Network* networkClient, int playerId) {
 
     this->playerId = playerId;
 
+    tilemap.load("assets/map_temp.csv", "assets/tilemap.png", 36); // change to constants later
 }
 
 
@@ -49,6 +50,7 @@ AppState InGameScreen::update(){
 void InGameScreen::draw(){
 
     BeginMode2D(camera);
+        tilemap.draw();
         for(int i = 0; i<4; i++){
             if(players[i].getIsConnected()){
                 Color playerColor = players[i].getIsSeeker() ? RED : BLUE;
