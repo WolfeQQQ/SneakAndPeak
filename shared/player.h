@@ -7,7 +7,7 @@ public:
     player();
     ~player();
 
-    enum class direction
+    enum class Direction
     {
         DOWN,
         UP,
@@ -15,7 +15,7 @@ public:
         RIGHT
     };
 
-    enum class playerState{
+    enum class PlayerState{
         IDLE,
         WALK,
         DEATH
@@ -44,8 +44,8 @@ public:
     bool getIsConnected() const;
     bool getIsRunning() const;
     ClientInput getClientInput() const;
-    direction getDirection() const;
-    playerState getPlayerState() const;
+    Direction getDirection() const;
+    PlayerState getPlayerState() const;
 
     //Setters
     void setX(float newX);
@@ -59,8 +59,8 @@ public:
     void setIsRunning(bool changedRunning);
     void setId(int newId);
     void setInput(ClientInput& newInput);
-    void setDirection(direction newDirection);
-    void setPlayerState(playerState newPlayerState);
+    void setDirection(Direction newDirection);
+    void setPlayerState(PlayerState newPlayerState);
 
 
 private:
@@ -79,7 +79,7 @@ private:
     //Client Input
     ClientInput input;
     //Direction
-    direction direction;
+    Direction direction;
     //PlayerState
-    playerState playerstate;
+    PlayerState playerstate;
 };
