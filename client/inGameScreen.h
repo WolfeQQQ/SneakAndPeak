@@ -34,7 +34,8 @@ class InGameScreen : public Screen {
 
         Camera2D camera;
         player myPlayer;
-        player players[4]; 
+        player players[4];
+        float gameTimer; 
         Network* network;
         int playerId;
         Tilemap tilemap;

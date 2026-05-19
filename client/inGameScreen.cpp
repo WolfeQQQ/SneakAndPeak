@@ -54,6 +54,7 @@ AppState InGameScreen::update(){
             players[i] = packet.players[i];
         }
     }
+    gameTimer = packet.timer;
 
     for(int i = 0; i< 4; i++){
         if(!players[i].getIsConnected()) continue;
@@ -176,6 +177,8 @@ void InGameScreen::draw(){
     DrawText("Stamina: ", 10, 10, 20,WHITE);
     DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
     DrawRectangleLines(10,40, 200, 20, WHITE);
+    DrawText(std::to_string(gameTimer).c_str(),GetScreenWidth()/2 - 25, 30, 20, WHITE);
+   
 
     
 }
