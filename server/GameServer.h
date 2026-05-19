@@ -37,6 +37,7 @@ private:
 
     void HandleNewConnection(int clientSock);
     void ClientListener(int playerId, int sock);
+    void ResetPlayer(int playerId);
     void GameUpdateLoop();
 
 public:

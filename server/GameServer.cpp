@@ -100,12 +100,25 @@ void GameServer::ClientListener(int playerId, int sock){
 
     {
         std::lock_guard<std::mutex> lock(stateMutex);
-        players[playerId].setIsConnected(false);
+
+        ResetPlayer(playerId);
+
         clientSockets[playerId] = 0;
-        std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
         std::cout << "Player" << playerId << "left the game. \n";
     }
     close(sock);
+}
+
+void GameServer::ResetPlayer(int playerId) {
+    players[playerId].setIsConnected(false);
+    players[playerId].setIsSeeker(false);
+    players[playerId].setIsCaught(false);
+    players[playerId].setIsRunning(false);
+    players[playerId].setX(500.0f);
+    players[playerId].setY(400.0f);
+    players[playerId].setStamina(100.0f);
+    players[playerId].setDirection(player::Direction::DOWN);
+    std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
 }
 
 void GameServer::GameUpdateLoop() {

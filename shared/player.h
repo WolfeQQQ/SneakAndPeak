@@ -24,6 +24,12 @@ public:
         RIGHT
     };
 
+    enum class PlayerState{
+        IDLE,
+        WALK,
+        DEATH
+    };
+
     //Client Input Definition
     struct ClientInput
     {
@@ -48,6 +54,7 @@ public:
     bool getIsRunning() const;
     ClientInput getClientInput() const;
     Direction getDirection() const;
+    PlayerState getPlayerState() const;
 
     //Setters
     void setX(float newX);
@@ -62,6 +69,7 @@ public:
     void setId(int newId);
     void setInput(ClientInput& newInput);
     void setDirection(Direction newDirection);
+    void setPlayerState(PlayerState newPlayerState);
 
 
 private:
@@ -79,7 +87,8 @@ private:
 
     //Client Input
     ClientInput input;
-    //
+    //Direction
     Direction direction;
-
+    //PlayerState
+    PlayerState playerstate;
 };
