@@ -2,16 +2,24 @@
 #include "GameServer.h"
 #include "../shared/player.h"
 #include "../shared/contstants.h"
+#include "../shared/gameState.h"
 #include <iostream>
 #include <cmath>
 #include <eigen3/Eigen/Dense>
 #include <fstream>
 #include <sstream> 
 #include <string>
+#include <algorithm>
+#include <random>
 
 gameLogic::gameLogic()
 {
     isStarted = false;
+    stageStarted = false;
+
+    //random seed initialization
+        std::random_device rd; 
+        std::mt19937 gen(rd());
 }
 
 gameLogic::~gameLogic()
@@ -24,40 +32,33 @@ float gameLogic::getGlobalTime() const {
 }
 
 //Main server logic  
-bool gameLogic::gameTick(player players[4]) {
+bool gameLogic::gameTick(player players[4], GameServer* server) {
 
     //Game time start with first inicialization
-    auto currentTime = std::chrono::steady_clock::now();
     if(isStarted == false) {
         bool crashFlag = loadMap();
         if(crashFlag) return true;
-        startTime = currentTime;
-        lastTime = startTime;
         isStarted = true;
         return false;
     }
 
-    //Game time calculations
-    std::chrono::duration<float> elapsed = currentTime - startTime;
-    globalTime = elapsed.count();
-    std::chrono::duration<float> frameDelta = currentTime - lastTime;
-    lastTime = currentTime;
-    float deltaTime = frameDelta.count();
+    float deltaTime = stateManager(players, server);
 
     //for-loop computing outcome for every player
     for(int i = 0; i < 4; i++) {
         if(players[i].getIsConnected() == false || players[i].getIsCaught() == true) continue;
         staminaHandler(players[i], deltaTime);
-        playerMove(players[i], players);
+        playerMove(players[i], players, server);
     }
     return false;
 }
 
-//Player move function
-void gameLogic::playerMove(player& currentPlayer, player players[4]) {
+//player move function
+void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer* server) {
     //variables
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float currentSpeed = currentPlayer.getSpeed(), directionX = 0.0f, directionY = 0.0f, adjustedSpeed = currentPlayer.getSpeed();
+    if(currentPlayer.getIsSeeker() && server->getGameStage() == GameState::COUNTDOWN) return;
 
     //adjusting speed for diagonal movement
     if(currentPlayerInput.up == true) directionY += 1.0f;
@@ -72,30 +73,30 @@ void gameLogic::playerMove(player& currentPlayer, player players[4]) {
     if(currentPlayerInput.up == true) {
         float direction = currentPlayer.getY() - adjustedSpeed;
         currentPlayer.setY(direction);
-        collision(currentPlayer, players, 0);
+        collision(currentPlayer, players, 0, server);
     }
     //DOWN
     if(currentPlayerInput.down == true) {
         float direction = currentPlayer.getY() + adjustedSpeed;
         currentPlayer.setY(direction);
-        collision(currentPlayer, players, 1);
+        collision(currentPlayer, players, 1, server);
     }
     //RIGHT
     if(currentPlayerInput.right == true) {
         float direction = currentPlayer.getX() + adjustedSpeed;
         currentPlayer.setX(direction);
-        collision(currentPlayer, players, 2);
+        collision(currentPlayer, players, 2, server);
     }
     //LEFT
     if(currentPlayerInput.left == true) {
         float direction = currentPlayer.getX() - adjustedSpeed;
         currentPlayer.setX(direction);
-        collision(currentPlayer, players, 3);
+        collision(currentPlayer, players, 3, server);
     }
 }
 
-//collision function with players
-void gameLogic::collision(player& currentPlayer, player players[4], int directionFlag) {
+//collision function with players and tilemap
+void gameLogic::collision(player& currentPlayer, player players[4], int directionFlag, GameServer* server) {
 
     //variables to calculate collsion
     float currentX = currentPlayer.getX(), currentY = currentPlayer.getY();
@@ -162,8 +163,10 @@ void gameLogic::collision(player& currentPlayer, player players[4], int directio
         break;
     }
 
+    if(server->getGameStage() == GameState::LOBBY) return;
     for(int i = 0; i < 4; i++) {
         if(&currentPlayer == &players[i]) continue;
+        if(players[i].getIsCaught()) continue;
 
         //variables for calculating edge points
         float otherX = players[i].getX(), otherY = players[i].getY();
@@ -359,7 +362,7 @@ bool gameLogic::loadMap() {
     return false;
 }
 
-//Tile map collsion method
+//tile map collsion method
 void gameLogic::checkCollision(player& currentPlayer, float currentX, float currentY, int playerPosOnGridX, int playerPosOnGridY, float directionFlag) {
     //variables for calculating edge points
         float otherX = (float)playerPosOnGridX * TILE_SIZE, otherY = (float)playerPosOnGridY * TILE_SIZE;
@@ -367,7 +370,104 @@ void gameLogic::checkCollision(player& currentPlayer, float currentX, float curr
         aabbAlgorithmTileMap(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
 }
  
+//game state manager method
+float gameLogic::stateManager(player players[4], GameServer* server) {
+    //variables
+    auto currentTime = std::chrono::steady_clock::now();
+    int connectedPlayers = std::count_if(players, players + 4, [](player& p) {
+        return p.getIsConnected();
+    });
 
+    //First time stage initalization
+    if(!stageStarted) {
+        startTime = currentTime;
+        lastTime = startTime;
+        stageStarted = true;
+
+        //drawing seeker
+        if(server->getGameStage() == GameState::COUNTDOWN) {
+            //adjusting possible seeker candidates
+            int possibleSeekers[4];
+            int count = 0;
+            for(int i = 0; i < 4; i++) {
+                if(players[i].getIsConnected()) {
+                    possibleSeekers[count] = i;
+                    count++;
+                }
+            }
+            
+            //drawing seeker
+            std::uniform_int_distribution<> distrib(0, count - 1);
+            seekerIndex = possibleSeekers[distrib(gen)];
+            players[seekerIndex].setIsSeeker(true);
+        }
+    }
+
+    //Game time calculations
+    std::chrono::duration<float> elapsed = currentTime - startTime;
+    globalTime = elapsed.count();
+
+    //game state handler
+    switch (server->getGameStage()) {
+        case GameState::LOBBY: {
+            //first check
+            if(connectedPlayers < 4 && globalTime <= 30.0f) break;
+
+            //case with no players in lobby
+            if(connectedPlayers == 0) {
+                startTime = currentTime;
+                lastTime = startTime;
+                break;
+            }
+            //case with not enough players (crushes server... probably)
+            if(connectedPlayers < 2) {
+                server->setIsRunning(false);
+                break;
+            }
+
+            //next stage
+            stageStarted = false;
+            server->setGameStage(GameState::COUNTDOWN);
+
+            break;
+        }
+        case GameState::COUNTDOWN: {
+
+            //next stage
+            if(globalTime > 15.0f) {
+                stageStarted = false;
+                server->setGameStage(GameState::GAME);
+            }
+            break;
+        }
+        case GameState::GAME: {
+            //caught players
+            int caughtPlayers = std::count_if(players, players + 4, [](player& p) {
+                return p.getIsCaught();
+            });
+            
+            //next stage (if game lasts more than 3 minutes or every hider is caught)
+            if(globalTime > 180.0f || caughtPlayers + 1 == connectedPlayers) {
+                stageStarted = false;
+                server->setGameStage(GameState::GAME_OVER);
+            }
+            break;
+        }
+        case GameState::GAME_OVER:
+
+            if(globalTime > 15.0f) {
+                server->setIsRunning(false);
+                break;
+            }
+            break;    
+        default:
+            break;
+    }
+
+    std::chrono::duration<float> frameDelta = currentTime - lastTime;
+    lastTime = currentTime;
+    return frameDelta.count();
+}
 
 
 
