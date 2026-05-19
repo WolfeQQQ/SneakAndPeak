@@ -1,14 +1,5 @@
 #pragma once
 
-// struct ClientInput {
-//     bool up;
-//     bool down;
-//     bool right;
-//     bool left;
-//     bool shift;
-//     //bool e_key;
-//     };
-
 class player
 {   
 public:
@@ -18,7 +9,7 @@ public:
 
     enum class Direction
     {
-        DOWN = 0,
+        DOWN,
         UP,
         LEFT,
         RIGHT

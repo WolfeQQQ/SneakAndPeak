@@ -6,22 +6,11 @@
 #include "tilemap.h"
 
 
-enum class PlayerState {
-    IDLE,
-    WALK,
-    DEATH
-};      //TEMP TO BE IMPLEMENTED IN SERVER
-enum class PlayerDirection {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
-};      //TEMP TO BE IMPLEMENTED IN SERVER
-
+  
 struct PlayerAnimation {
-    PlayerState lastState = PlayerState::IDLE;
-    PlayerState state = PlayerState::IDLE;
-    PlayerDirection direction = PlayerDirection::DOWN;
+    player::PlayerState lastState = player::PlayerState::IDLE;
+    player::PlayerState state = player::PlayerState::IDLE;
+    player::Direction direction = player::Direction::DOWN;
 
     int frame = 0;
     float frameTimer = 0.0f;

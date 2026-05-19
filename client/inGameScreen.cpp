@@ -58,8 +58,8 @@ AppState InGameScreen::update(){
         }
 
         PlayerAnimation& anim = playerAnim[i];
-        PlayerState currentState = players[i].getIsCaught() ? PlayerState::DEATH : (players[i].getClientInput().up || players[i].getClientInput().down || players[i].getClientInput().left || players[i].getClientInput().right) ? PlayerState::WALK : PlayerState::IDLE;
-        //TEMP LINIJKA DO ZMIANY NA player.getState() PO IMPLEMENTACJI TEGO W SERVERZE
+        
+        player::PlayerState currentState = players[i].getPlayerState();
 
         if(anim.lastState != currentState){
             anim.frame = 0;
@@ -68,14 +68,14 @@ AppState InGameScreen::update(){
         }
 
         int maxFrames = 2;
-        if(currentState == PlayerState::DEATH) maxFrames = 3;
-        if(currentState == PlayerState::WALK) maxFrames = 4;
+        if(currentState == player::PlayerState::DEATH) maxFrames = 3;
+        if(currentState == player::PlayerState::WALK) maxFrames = 4;
 
         anim.frameTimer += GetFrameTime();
         if(anim.frameTimer >= 0.2f){
             anim.frameTimer = 0.0f;
 
-            if(currentState == PlayerState::DEATH){
+            if(currentState == player::PlayerState::DEATH){
                 if(anim.frame < maxFrames - 1){
                     anim.frame++;
                 }
@@ -108,24 +108,24 @@ void InGameScreen::draw(){
             if(!players[i].getIsConnected()) continue;
 
             PlayerAnimation& anim = playerAnim[i];
-            PlayerState currentState = players[i].getIsCaught() ? PlayerState::DEATH : (players[i].getClientInput().up || players[i].getClientInput().down || players[i].getClientInput().left || players[i].getClientInput().right) ? PlayerState::WALK : PlayerState::IDLE;
+            player::PlayerState currentState = players[i].getPlayerState();
         //TEMP LINIJKA DO ZMIANY NA player.getState() PO IMPLEMENTACJI TEGO W SERVERZE
-            PlayerDirection direction = players[i].getClientInput().up ? PlayerDirection::UP : players[i].getClientInput().down ? PlayerDirection::DOWN : players[i].getClientInput().left ? PlayerDirection::LEFT : players[i].getClientInput().right ? PlayerDirection::RIGHT : PlayerDirection::DOWN;
+            player::Direction direction = players[i].getDirection();
             //tez do zmiany XDDD
 
             Texture2D currentTexture;
             switch (currentState)
             {
-            case PlayerState::IDLE:
+            case player::PlayerState::IDLE:
                 if(players[i].getIsSeeker()) currentTexture = seekerIdleTexture;
                 else currentTexture = playerIdleTexture;
     
                 break;
-            case PlayerState::WALK:
+            case player::PlayerState::WALK:
                 if(players[i].getIsSeeker()) currentTexture = seekerWalkTexture;
                 else currentTexture = playerWalkTexture;
                 break;
-            case PlayerState::DEATH:
+            case player::PlayerState::DEATH:
                 if(players[i].getIsSeeker()) currentTexture = seekerDeathTexture;
                 else currentTexture = playerDeathTexture;
                 break;
@@ -135,12 +135,12 @@ void InGameScreen::draw(){
             }
 
             int row;
-            if(direction == PlayerDirection::DOWN) row = 0;
-            else if(direction == PlayerDirection::LEFT || direction == PlayerDirection::RIGHT) row = 1;
-            else if(direction == PlayerDirection::UP) row = 2;
+            if(direction == player::Direction::DOWN) row = 0;
+            else if(direction == player::Direction::LEFT || direction == player::Direction::RIGHT) row = 1;
+            else if(direction == player::Direction::UP) row = 2;
 
             float frameWidth = 32.0f;
-            if(direction == PlayerDirection::LEFT){
+            if(direction == player::Direction::LEFT){
                 frameWidth = -32.0f;
             }
 
