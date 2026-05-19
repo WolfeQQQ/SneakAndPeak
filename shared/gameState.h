@@ -1,5 +1,7 @@
 #pragma once
 
+#include "contstants.h"
+
 enum class GameState {
     LOBBY,
     COUNTDOWN,
