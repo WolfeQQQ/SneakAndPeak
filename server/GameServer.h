@@ -6,7 +6,14 @@
 
 #include "../shared/contstants.h"
 #include "../shared/player.h"
+#include "../shared/gameState.h"
 #include "gameLogic.h"
+
+struct GameStatePacket {
+    GameState stage;
+    float timer;
+    player players[MAX_CLIENTS];
+};
 
 class GameServer {
 private:
@@ -24,6 +31,9 @@ private:
     
 
     int clientSockets[MAX_CLIENTS];
+
+    GameState currentState;
+    float stateTimer;
 
     void HandleNewConnection(int clientSock);
     void ClientListener(int playerId, int sock);
@@ -44,4 +54,9 @@ public:
     void StateToUpload();
     //Allows to block the server while it computes something itself (thread safety)
     std::mutex& getMutex() { return stateMutex; }
+
+    GameState getGameStage() const { return currentState; }
+    void setGameStage(GameState stage) { currentState = stage; }
+    float getStageTimer() const { return stateTimer; }
+    void setStageTimer(float time) { stateTimer = time; }
 };
