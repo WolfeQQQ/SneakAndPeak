@@ -64,8 +64,8 @@ void GameServer::HandleNewConnection(int clientSock){
 
             players[i].setIsConnected(true);
             players[i].setId(i);
-            players[i].setX(100.0f); 
-            players[i].setY(100.0f);
+            players[i].setX(500.0f); 
+            players[i].setY(400.0f);
             players[i].setSpeed(4.0f);
             players[i].setStamina(100.0f);
             players[i].setIsCaught(false);
@@ -121,6 +121,8 @@ void GameServer::GameUpdateLoop() {
             }
 
             logic.gameTick(players, this);
+            bool toStop = logic.gameTick(players);
+            if(toStop) Stop();
         }
 
         StateToUpload();
