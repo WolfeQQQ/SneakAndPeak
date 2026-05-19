@@ -170,39 +170,39 @@ void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer*
     if(currentPlayerInput.right == true) directionX += 1.0f;
     if(currentPlayerInput.left == true) directionX += -1.0f;
     if(directionX == 0 && directionY == 0) {
-        currentPlayer.setPlayerState(player::playerState::IDLE);
+        currentPlayer.setPlayerState(player::PlayerState::IDLE);
         return;
     }
     currentSpeed = std::sqrt((directionX * directionX) + (directionY * directionY));
     adjustedSpeed = 1.0f/currentSpeed * currentPlayer.getSpeed();
 
-    currentPlayer.setPlayerState(player::playerState::WALK);
+    currentPlayer.setPlayerState(player::PlayerState::WALK);
     //UP
     if(currentPlayerInput.up == true) {
         float direction = currentPlayer.getY() - adjustedSpeed;
         currentPlayer.setY(direction);
-        currentPlayer.setDirection(player::direction::UP);
+        currentPlayer.setDirection(player::Direction::UP);
         collision(currentPlayer, players, 0, server);
     }
     //DOWN
     if(currentPlayerInput.down == true) {
         float direction = currentPlayer.getY() + adjustedSpeed;
         currentPlayer.setY(direction);
-        currentPlayer.setDirection(player::direction::DOWN);
+        currentPlayer.setDirection(player::Direction::DOWN);
         collision(currentPlayer, players, 1, server);
     }
     //RIGHT
     if(currentPlayerInput.right == true) {
         float direction = currentPlayer.getX() + adjustedSpeed;
         currentPlayer.setX(direction);
-        currentPlayer.setDirection(player::direction::RIGHT);
+        currentPlayer.setDirection(player::Direction::RIGHT);
         collision(currentPlayer, players, 2, server);
     }
     //LEFT
     if(currentPlayerInput.left == true) {
         float direction = currentPlayer.getX() - adjustedSpeed;
         currentPlayer.setX(direction);
-        currentPlayer.setDirection(player::direction::LEFT);
+        currentPlayer.setDirection(player::Direction::LEFT);
         collision(currentPlayer, players, 3, server);
     }
 }
@@ -288,12 +288,12 @@ void gameLogic::collision(player& currentPlayer, player players[4], int directio
         //collision handling
         if(currentPlayer.getIsSeeker() == true) {
             players[i].setIsCaught(true);
-            players[i].setPlayerState(player::playerState::DEATH);
+            players[i].setPlayerState(player::PlayerState::DEATH);
             return;
         }
         if(players[i].getIsSeeker() == true) {
             currentPlayer.setIsCaught(true);
-            currentPlayer.setPlayerState(player::playerState::DEATH);
+            currentPlayer.setPlayerState(player::PlayerState::DEATH);
             return;
         }
     }
