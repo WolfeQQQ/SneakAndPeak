@@ -62,6 +62,10 @@ player::ClientInput player::getClientInput() const {
 player::Direction player::getDirection() const {
     return direction;
 }
+player::PlayerState player::getPlayerState() const {
+    return playerstate;
+}
+
 
 
 //Setters
@@ -100,4 +104,7 @@ void player::setInput(ClientInput& newInput) {
 }
 void player::setDirection(player::Direction newDirection) {
     direction = newDirection;
+}
+void player::setPlayerState(player::PlayerState newPlayerState) {
+    playerstate = newPlayerState;
 }
