@@ -79,5 +79,7 @@ private:
 
     //Client Input
     ClientInput input;
+    //
+    Direction direction;
 
 };
