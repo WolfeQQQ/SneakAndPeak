@@ -10,8 +10,11 @@
 GameServer::GameServer(){
     isRunning = false;
     listenSocket = -1;
+    currentState = GameState::LOBBY;
+    stateTimer = 0.0f;
     std::memset(clientSockets, 0, sizeof(clientSockets));
     std::memset(clientInputs, 0, sizeof(clientInputs));
+
 }
 
 //Destructor
@@ -117,6 +120,7 @@ void GameServer::GameUpdateLoop() {
                 }
             }
 
+            logic.gameTick(players, this);
             bool toStop = logic.gameTick(players);
             if(toStop) Stop();
         }
@@ -131,9 +135,16 @@ void GameServer::GameUpdateLoop() {
 //server->StateToUpload()
 void GameServer::StateToUpload(){
     std::lock_guard<std::mutex> lock(stateMutex);
+    
+    GameStatePacket packet;
+    packet.stage = currentState;
+    packet.timer = stateTimer;
+    std::memcpy(packet.players, players, sizeof(players));
+
     for(int i = 0; i < MAX_CLIENTS; i++){
         if(players[i].getIsConnected() == true){
-            send(clientSockets[i], players, sizeof(player) * MAX_CLIENTS, 0);
+            // Wysyłamy strukturę pakietu zamiast samej tablicy players
+            send(clientSockets[i], &packet, sizeof(GameStatePacket), 0);
         }
     }
 }
