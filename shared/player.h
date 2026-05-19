@@ -1,14 +1,5 @@
 #pragma once
 
-// struct ClientInput {
-//     bool up;
-//     bool down;
-//     bool right;
-//     bool left;
-//     bool shift;
-//     //bool e_key;
-//     };
-
 class player
 {   
 public:
@@ -16,15 +7,15 @@ public:
     player();
     ~player();
 
-    enum class Direction
+    enum class direction
     {
-        DOWN = 0,
+        DOWN,
         UP,
         LEFT,
         RIGHT
     };
 
-    enum class PlayerState{
+    enum class playerState{
         IDLE,
         WALK,
         DEATH
@@ -53,8 +44,8 @@ public:
     bool getIsConnected() const;
     bool getIsRunning() const;
     ClientInput getClientInput() const;
-    Direction getDirection() const;
-    PlayerState getPlayerState() const;
+    direction getDirection() const;
+    playerState getPlayerState() const;
 
     //Setters
     void setX(float newX);
@@ -68,8 +59,8 @@ public:
     void setIsRunning(bool changedRunning);
     void setId(int newId);
     void setInput(ClientInput& newInput);
-    void setDirection(Direction newDirection);
-    void setPlayerState(PlayerState newPlayerState);
+    void setDirection(direction newDirection);
+    void setPlayerState(playerState newPlayerState);
 
 
 private:
@@ -88,7 +79,7 @@ private:
     //Client Input
     ClientInput input;
     //Direction
-    Direction direction;
+    direction direction;
     //PlayerState
-    PlayerState playerstate;
+    playerState playerstate;
 };
