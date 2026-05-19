@@ -32,6 +32,7 @@ private:
     void aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag);
     void aabbAlgorithmTileMap(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag); 
     //collision -> directionFlag: 0 - up, 1 - down, 2 - right, 3 - left
+    void checkCollision(player& currentPlayer, float currentX, float currentY, int playerPosOnGridX, int playerPosOnGridY, float directionFlag);
     void staminaHandler(player& currentPlayer, float deltaTime);
     bool loadMap();
 };

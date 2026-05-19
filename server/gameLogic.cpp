@@ -97,20 +97,69 @@ void gameLogic::playerMove(player& currentPlayer, player players[4]) {
 //collision function with players
 void gameLogic::collision(player& currentPlayer, player players[4], int directionFlag) {
 
-    //variables to check grid
-    int playerPosOnGridX = (int)currentPlayer.getX() / TILE_SIZE;
-    int playerPosOnGridY = (int)currentPlayer.getY() / TILE_SIZE;
-
     //variables to calculate collsion
     float currentX = currentPlayer.getX(), currentY = currentPlayer.getY();
 
-    //tile map collision check
-    if(tileMap(playerPosOnGridY, playerPosOnGridX) != -1) {
+    //min max X and min max Y
+    int playerPosOnGridXMin = (int)currentPlayer.getX()/ TILE_SIZE;
+    int playerPosOnGridYMin = (int)currentPlayer.getY()/ TILE_SIZE;
+    int playerPosOnGridXMax = ((int)currentPlayer.getX() + PLAYER_WIDTH) / TILE_SIZE;
+    int playerPosOnGridYMax = ((int)currentPlayer.getY() + PLAYER_LENGTH) / TILE_SIZE;
+    
+    switch (directionFlag) {
+    case 0: //UP
 
-        //variables for calculating edge points
-        float otherX = (float)playerPosOnGridX, otherY = (float)playerPosOnGridY;
+        //tile map collision check
+        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMin) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMin, directionFlag);
+            break;
+        }
+        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMax) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMin, directionFlag);
+            break;
+        };
 
-        aabbAlgorithmTileMap(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
+        break;
+    
+    case 1: //DOWN
+        //tile map collision check
+        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMin) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMax, directionFlag);
+            break;
+        }
+        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMax) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMax, directionFlag);
+            break;
+        };
+        break;
+        
+    case 2: // RIGHT
+
+        //tile map collision check
+        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMax) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMin, directionFlag);
+            break;
+        }
+        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMax) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMax, directionFlag);
+            break;
+        };
+        break;
+    
+    case 3: //LEFT
+
+        //tile map collision check
+        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMin) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMin, directionFlag);
+            break;
+        }
+        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMin) != -1) {
+            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMax, directionFlag);
+            break;
+        };
+
+    default:
+        break;
     }
 
     for(int i = 0; i < 4; i++) {
@@ -150,22 +199,22 @@ void gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     switch (directionFlag)
     {
     case 0: //up
-        diffrence = (otherY + lengthPoint) - (currentY - lengthPoint) + 2.0f;
+        diffrence = (otherY + lengthPoint) - (currentY - lengthPoint) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() + diffrence);
         break;
         
     case 1: //down
-        diffrence = (currentY + lengthPoint) - (otherY - lengthPoint) + 2.0f;
+        diffrence = (currentY + lengthPoint) - (otherY - lengthPoint) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() - diffrence);
         break;
 
     case 2: //right
-        diffrence = (currentX + widthPoint) - (otherX - widthPoint) + 2.0f;
+        diffrence = (currentX + widthPoint) - (otherX - widthPoint) + 0.1f;
         currentPlayer.setX(currentPlayer.getX() - diffrence);
         break;
             
     case 3: //left
-        diffrence = (otherX + widthPoint) - (currentX - widthPoint) + 2.0f;
+        diffrence = (otherX + widthPoint) - (currentX - widthPoint) + 0.1f;
         currentPlayer.setX(currentPlayer.getX() + diffrence);
         break;
 
@@ -176,37 +225,34 @@ void gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
 
 //AABB algorithm function for tilemap
 void gameLogic::aabbAlgorithmTileMap(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag) {
-
-    float widthPoint = PLAYER_WIDTH/2;
-    float lengthPoint = PLAYER_LENGTH/2;
     float diffrence = 0.0f;
 
     //AABB algorithm calculations
-    if ((currentX - widthPoint) > (otherX + (float)(TILE_SIZE - 1))) return;
-    if ((currentX + widthPoint) < (otherX)) return;
-    if ((currentY - lengthPoint) > (otherY + (float)(TILE_SIZE - 1))) return;
-    if ((currentY + lengthPoint) < (otherY)) return;
+    // if ((currentX) > (otherX + (float)(TILE_SIZE))) return;
+    if ((currentX + PLAYER_WIDTH) < (otherX)) return;
+    if ((currentY) > (otherY + (float)(TILE_SIZE))) return;
+    if ((currentY + PLAYER_LENGTH) < (otherY)) return;
 
-    //Adjusting current player position based on AABB algorithm calculations
+    // Adjusting current player position based on AABB algorithm calculations
     switch (directionFlag)
     {
     case 0: //up
-        diffrence = (otherY + (float)(TILE_SIZE - 1)) - (currentY - lengthPoint) + 2.0f;
+        diffrence = (otherY + (float)(TILE_SIZE)) - (currentY) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() + diffrence);
         break;
         
     case 1: //down
-        diffrence = (currentY + lengthPoint) - (otherY) + 2.0f;
+        diffrence = (currentY + PLAYER_LENGTH) - (otherY) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() - diffrence);
         break;
 
     case 2: //right
-        diffrence = (currentX + widthPoint) - (otherX) + 2.0f;
+        diffrence = (currentX + PLAYER_WIDTH) - (otherX) + 0.1f;
         currentPlayer.setX(currentPlayer.getX() - diffrence);
         break;
             
     case 3: //left
-        diffrence = (otherX + (float)(TILE_SIZE - 1)) - (currentX - widthPoint) + 2.0f;
+        diffrence = (otherX + (float)(TILE_SIZE)) - (currentX) + 0.1f;
         currentPlayer.setX(currentPlayer.getX() + diffrence);
         break;
 
@@ -224,8 +270,6 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float stamina = currentPlayer.getStamina();
     float currentSpeed = currentPlayer.getSpeed();
-    std::cout << stamina << std::endl;
-    std::cout << currentSpeed << std::endl;
 
     /*
         *@brief: stamina usage and regeneration handler
@@ -281,7 +325,7 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
 //loading tilemap
 bool gameLogic::loadMap() {
 
-    std::ifstream plik("shared/TileMap.csv");
+    std::ifstream plik("assets/map_temp.csv");
 
     //error message no data to load
     if(!plik.is_open()) {
@@ -315,6 +359,13 @@ bool gameLogic::loadMap() {
     return false;
 }
 
+//Tile map collsion method
+void gameLogic::checkCollision(player& currentPlayer, float currentX, float currentY, int playerPosOnGridX, int playerPosOnGridY, float directionFlag) {
+    //variables for calculating edge points
+        float otherX = (float)playerPosOnGridX * TILE_SIZE, otherY = (float)playerPosOnGridY * TILE_SIZE;
+
+        aabbAlgorithmTileMap(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
+}
  
 
 
