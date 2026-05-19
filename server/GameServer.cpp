@@ -121,7 +121,7 @@ void GameServer::GameUpdateLoop() {
             }
 
             logic.gameTick(players, this);
-            bool toStop = logic.gameTick(players);
+            bool toStop = logic.gameTick(players, this);
             if(toStop) Stop();
         }
 

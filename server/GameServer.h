@@ -59,4 +59,8 @@ public:
     void setGameStage(GameState stage) { currentState = stage; }
     float getStageTimer() const { return stateTimer; }
     void setStageTimer(float time) { stateTimer = time; }
+
+    void setIsRunning(bool running){ 
+        isRunning = running; 
+    }
 };
