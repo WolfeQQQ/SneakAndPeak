@@ -9,11 +9,7 @@
 #include "../shared/gameState.h"
 #include "gameLogic.h"
 
-struct GameStatePacket {
-    GameState stage;
-    float timer;
-    player players[MAX_CLIENTS];
-};
+
 
 class GameServer {
 private:

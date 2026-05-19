@@ -162,7 +162,7 @@ void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer*
     //variables
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float currentSpeed = currentPlayer.getSpeed(), directionX = 0.0f, directionY = 0.0f, adjustedSpeed = currentPlayer.getSpeed();
-    if(currentPlayer.getIsSeeker() && server->getGameStage() == GameState::COUNTDOWN)
+    if(currentPlayer.getIsSeeker() && server->getGameStage() == GameState::COUNTDOWN) return;
 
     //adjusting speed for diagonal movement
     if(currentPlayerInput.up == true) directionY += 1.0f;
@@ -283,8 +283,9 @@ void gameLogic::collision(player& currentPlayer, player players[4], int directio
         //variables for calculating edge points
         float otherX = players[i].getX(), otherY = players[i].getY();
 
-        aabbAlgorithm(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
-
+        bool isColliding = aabbAlgorithm(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
+        if (!isColliding) continue;
+        
         //collision handling
         if(currentPlayer.getIsSeeker() == true) {
             players[i].setIsCaught(true);
@@ -308,17 +309,17 @@ void gameLogic::checkCollision(player& currentPlayer, float currentX, float curr
 }
 
 //AABB algorithm function for players
-void gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag) {
+bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag) {
 
     float widthPoint = PLAYER_WIDTH/2;
     float lengthPoint = PLAYER_LENGTH/2;
     float diffrence = 0.0f;
 
     //AABB algorithm calculations
-    if ((currentX - widthPoint) > (otherX + widthPoint)) return;
-    if ((currentX + widthPoint) < (otherX - widthPoint)) return;
-    if ((currentY - lengthPoint) > (otherY + lengthPoint)) return;
-    if ((currentY + lengthPoint) < (otherY - lengthPoint)) return;
+    if ((currentX - widthPoint) > (otherX + widthPoint)) return false;
+    if ((currentX + widthPoint) < (otherX - widthPoint)) return false;
+    if ((currentY - lengthPoint) > (otherY + lengthPoint)) return false;
+    if ((currentY + lengthPoint) < (otherY - lengthPoint)) return false;
 
     //Adjusting current player position based on AABB algorithm calculations
     switch (directionFlag)
@@ -346,6 +347,7 @@ void gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     default:
         break;
     }
+    return true;
 }
 
 //AABB algorithm function for tilemap

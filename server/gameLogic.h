@@ -41,7 +41,7 @@ private:
         //collision -> directionFlag: 0 - up, 1 - down, 2 - right, 3 - left
     */
     void collision(player& currentPlayer, player players[4], int directionFlag, GameServer* server);
-    void aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag);
+    bool aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag);
     void aabbAlgorithmTileMap(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag); 
     void checkCollision(player& currentPlayer, float currentX, float currentY, int playerPosOnGridX, int playerPosOnGridY, float directionFlag);
 

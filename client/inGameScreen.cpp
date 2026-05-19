@@ -47,8 +47,14 @@ AppState InGameScreen::update(){
     
     network ->SendInput(input);
 
-    network ->ReceiveState(players);
+    GameStatePacket packet;
 
+    if(network ->ReceiveState(packet)){
+        for(int i = 0; i < 4; i++){
+            players[i] = packet.players[i];
+        }
+    }
+    gameTimer = packet.timer;
 
     for(int i = 0; i< 4; i++){
         if(!players[i].getIsConnected()) continue;
@@ -109,9 +115,9 @@ void InGameScreen::draw(){
 
             PlayerAnimation& anim = playerAnim[i];
             player::PlayerState currentState = players[i].getPlayerState();
-        //TEMP LINIJKA DO ZMIANY NA player.getState() PO IMPLEMENTACJI TEGO W SERVERZE
+        
             player::Direction direction = players[i].getDirection();
-            //tez do zmiany XDDD
+           
 
             Texture2D currentTexture;
             switch (currentState)
@@ -171,6 +177,8 @@ void InGameScreen::draw(){
     DrawText("Stamina: ", 10, 10, 20,WHITE);
     DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
     DrawRectangleLines(10,40, 200, 20, WHITE);
+    DrawText(std::to_string(gameTimer).c_str(),GetScreenWidth()/2 - 25, 30, 20, WHITE);
+   
 
     
 }
