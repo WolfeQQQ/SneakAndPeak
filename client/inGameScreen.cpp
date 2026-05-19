@@ -47,7 +47,12 @@ AppState InGameScreen::update(){
     
     network ->SendInput(input);
 
-    network ->ReceiveState(players);
+    GameStatePacket packet;
+
+    network ->ReceiveState(packet);
+    for(int i = 0; i < 4; i++){
+        players[i] = packet.players[i];
+    }
 
 
     for(int i = 0; i< 4; i++){
@@ -109,9 +114,9 @@ void InGameScreen::draw(){
 
             PlayerAnimation& anim = playerAnim[i];
             player::PlayerState currentState = players[i].getPlayerState();
-        //TEMP LINIJKA DO ZMIANY NA player.getState() PO IMPLEMENTACJI TEGO W SERVERZE
+        
             player::Direction direction = players[i].getDirection();
-            //tez do zmiany XDDD
+           
 
             Texture2D currentTexture;
             switch (currentState)

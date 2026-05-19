@@ -2,6 +2,7 @@
 
 #include <string>
 #include "../shared/player.h"
+#include "../shared/gameState.h"
 
 class Network{
     private:
@@ -16,7 +17,7 @@ class Network{
         void Disconnect();
         bool IsConnected() const { return connected; }
         void SendInput(player::ClientInput input);
-        void ReceiveState(player players[4]);
+        void ReceiveState(GameStatePacket& packet);
 
 
 

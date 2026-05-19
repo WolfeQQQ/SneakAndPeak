@@ -64,10 +64,10 @@ void Network::SendInput(player::ClientInput input) {
     }
 }
 
-void Network::ReceiveState(player players[4]) {
+void Network::ReceiveState(GameStatePacket& packet) {
     if(!connected || sock == -1) return;
     
-    int bytesRead = recv(sock, players, sizeof(player) * 4, MSG_DONTWAIT);
+    int bytesRead = recv(sock, &packet, sizeof(GameStatePacket), MSG_DONTWAIT);
 
     if (bytesRead > 0) {
         std::cout << "[Network] Otrzymano stan od serwera.\n";
