@@ -12,7 +12,25 @@ InGameScreen::InGameScreen(Network* networkClient, int playerId) {
 
     this->playerId = playerId;
 
+    playerIdleTexture = LoadTexture("assets/player/blue/idle.png");
+    playerWalkTexture = LoadTexture("assets/player/blue/walk.png");
+    playerDeathTexture = LoadTexture("assets/player/blue/death.png");
+
+    seekerIdleTexture = LoadTexture("assets/player/red/idle.png");
+    seekerWalkTexture = LoadTexture("assets/player/red/walk.png");
+    seekerDeathTexture = LoadTexture("assets/player/red/death.png");
+
     tilemap.load("assets/map_temp.csv", "assets/tilemap.png", 36); // change to constants later
+}
+
+InGameScreen::~InGameScreen() {
+    UnloadTexture(playerIdleTexture);
+    UnloadTexture(playerWalkTexture);
+    UnloadTexture(playerDeathTexture);
+    UnloadTexture(seekerIdleTexture);
+    UnloadTexture(seekerWalkTexture);
+    UnloadTexture(seekerDeathTexture);
+    tilemap.unload();
 }
 
 
@@ -31,14 +49,46 @@ AppState InGameScreen::update(){
 
     network ->ReceiveState(players);
 
-    for (int i = 0; i < 4; i++){
+
+    for(int i = 0; i< 4; i++){
+        if(!players[i].getIsConnected()) continue;
+
         if(players[i].getId() == this ->playerId){
             myPlayer = players[i];
-            break;
         }
+
+        PlayerAnimation& anim = playerAnim[i];
+        PlayerState currentState = players[i].getIsCaught() ? PlayerState::DEATH : (players[i].getClientInput().up || players[i].getClientInput().down || players[i].getClientInput().left || players[i].getClientInput().right) ? PlayerState::WALK : PlayerState::IDLE;
+        //TEMP LINIJKA DO ZMIANY NA player.getState() PO IMPLEMENTACJI TEGO W SERVERZE
+
+        if(anim.lastState != currentState){
+            anim.frame = 0;
+            anim.frameTimer = 0.0f;
+            anim.lastState = currentState;
+        }
+
+        int maxFrames = 2;
+        if(currentState == PlayerState::DEATH) maxFrames = 3;
+        if(currentState == PlayerState::WALK) maxFrames = 4;
+
+        anim.frameTimer += GetFrameTime();
+        if(anim.frameTimer >= 0.2f){
+            anim.frameTimer = 0.0f;
+
+            if(currentState == PlayerState::DEATH){
+                if(anim.frame < maxFrames - 1){
+                    anim.frame++;
+                }
+            }
+            else{
+                anim.frame = (anim.frame + 1) % maxFrames;
+            }
+
+        }
+
     }
 
-    camera.target = (Vector2){std::round(myPlayer.getX()) + 10, std::round(myPlayer.getY())+10};
+    camera.target = (Vector2){std::round(myPlayer.getX()) + 10, std::round(myPlayer.getY())+15};
 
     // if(IsKeyPressed(KEY_ESCAPE)){
     //     return AppState::MAIN_MENU;
@@ -50,15 +100,71 @@ AppState InGameScreen::update(){
 void InGameScreen::draw(){
 
     BeginMode2D(camera);
+
         tilemap.draw();
+
         for(int i = 0; i<4; i++){
+
+            if(!players[i].getIsConnected()) continue;
+
+            PlayerAnimation& anim = playerAnim[i];
+            PlayerState currentState = players[i].getIsCaught() ? PlayerState::DEATH : (players[i].getClientInput().up || players[i].getClientInput().down || players[i].getClientInput().left || players[i].getClientInput().right) ? PlayerState::WALK : PlayerState::IDLE;
+        //TEMP LINIJKA DO ZMIANY NA player.getState() PO IMPLEMENTACJI TEGO W SERVERZE
+            PlayerDirection direction = players[i].getClientInput().up ? PlayerDirection::UP : players[i].getClientInput().down ? PlayerDirection::DOWN : players[i].getClientInput().left ? PlayerDirection::LEFT : players[i].getClientInput().right ? PlayerDirection::RIGHT : PlayerDirection::DOWN;
+            //tez do zmiany XDDD
+
+            Texture2D currentTexture;
+            switch (currentState)
+            {
+            case PlayerState::IDLE:
+                if(players[i].getIsSeeker()) currentTexture = seekerIdleTexture;
+                else currentTexture = playerIdleTexture;
+    
+                break;
+            case PlayerState::WALK:
+                if(players[i].getIsSeeker()) currentTexture = seekerWalkTexture;
+                else currentTexture = playerWalkTexture;
+                break;
+            case PlayerState::DEATH:
+                if(players[i].getIsSeeker()) currentTexture = seekerDeathTexture;
+                else currentTexture = playerDeathTexture;
+                break;
+            default:
+                currentTexture = playerIdleTexture;
+                break;
+            }
+
+            int row;
+            if(direction == PlayerDirection::DOWN) row = 0;
+            else if(direction == PlayerDirection::LEFT || direction == PlayerDirection::RIGHT) row = 1;
+            else if(direction == PlayerDirection::UP) row = 2;
+
+            float frameWidth = 32.0f;
+            if(direction == PlayerDirection::LEFT){
+                frameWidth = -32.0f;
+            }
+
+            Rectangle source = {(float)(anim.frame * 32), (float)(row * 32), frameWidth, 32.0f};
+
+            float scale = 2.0f;
+            float drawSize = 32.0f * scale;
+            float dX = players[i].getX() - (drawSize / 2) + 10;
+            float dY = players[i].getY() - (drawSize / 2) + 15;
+            Rectangle dest = {dX, dY, drawSize, drawSize};
+            DrawTexturePro(currentTexture, source, dest, (Vector2){0,0}, 0.0f, WHITE);
+
             if(players[i].getIsConnected()){
-                Color playerColor = players[i].getIsSeeker() ? RED : BLUE;
-                DrawRectangle(std::round(players[i].getX()), std::round(players[i].getY()), 20, 30, playerColor);
+                // Color playerColor = players[i].getIsSeeker() ? RED : BLUE;
+                // DrawRectangle(std::round(players[i].getX()), std::round(players[i].getY()), 20, 30, playerColor);
 
                 DrawText(std::to_string(players[i].getId()).c_str(), std::round(players[i].getX()), std::round(players[i].getY()) - 20, 10, WHITE);
             }
+
+
         }
+
+
+
     EndMode2D();
         
         
