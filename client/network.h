@@ -17,7 +17,7 @@ class Network{
         void Disconnect();
         bool IsConnected() const { return connected; }
         void SendInput(player::ClientInput input);
-        void ReceiveState(GameStatePacket& packet);
+        bool ReceiveState(GameStatePacket& packet);
 
 
 

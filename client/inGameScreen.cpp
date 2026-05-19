@@ -49,11 +49,11 @@ AppState InGameScreen::update(){
 
     GameStatePacket packet;
 
-    network ->ReceiveState(packet);
-    for(int i = 0; i < 4; i++){
-        players[i] = packet.players[i];
+    if(network ->ReceiveState(packet)){
+        for(int i = 0; i < 4; i++){
+            players[i] = packet.players[i];
+        }
     }
-
 
     for(int i = 0; i< 4; i++){
         if(!players[i].getIsConnected()) continue;
