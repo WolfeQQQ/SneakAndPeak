@@ -6,3 +6,9 @@ enum class GameState {
     GAME,
     GAME_OVER
 };
+
+struct GameStatePacket {
+    GameState stage;
+    float timer;
+    player players[MAX_CLIENTS];
+};
