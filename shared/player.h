@@ -16,6 +16,14 @@ public:
     player();
     ~player();
 
+    enum class Direction
+    {
+        DOWN = 0,
+        UP,
+        LEFT,
+        RIGHT
+    };
+
     //Client Input Definition
     struct ClientInput
     {
@@ -39,6 +47,7 @@ public:
     bool getIsConnected() const;
     bool getIsRunning() const;
     ClientInput getClientInput() const;
+    Direction getDirection() const;
 
     //Setters
     void setX(float newX);
@@ -52,6 +61,7 @@ public:
     void setIsRunning(bool changedRunning);
     void setId(int newId);
     void setInput(ClientInput& newInput);
+    void setDirection(Direction newDirection);
 
 
 private:

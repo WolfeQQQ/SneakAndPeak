@@ -12,6 +12,7 @@ player::player() {
     this->isSeeker = false;
     this->isRunning = false;
     this->abilityCooldown = 0.0f;
+    direction = player::Direction::DOWN;
 
     this->input.up = false;
     this->input.down = false;
@@ -58,6 +59,9 @@ bool player::getIsRunning() const {
 player::ClientInput player::getClientInput() const {
     return this->input;
 }
+player::Direction player::getDirection() const {
+    return direction;
+}
 
 
 //Setters
@@ -93,4 +97,7 @@ void player::setIsRunning(bool newRunning) {
 }
 void player::setInput(ClientInput& newInput) {
     this->input = newInput;
+}
+void player::setDirection(player::Direction newDirection) {
+    direction = newDirection;
 }
