@@ -1,5 +1,5 @@
-#include "GameServer.h"
 #include "gameLogic.h"
+#include "GameServer.h"
 #include "../shared/player.h"
 #include "../shared/contstants.h"
 #include "../shared/gameState.h"
@@ -16,18 +16,19 @@ gameLogic::gameLogic()
 {
     isStarted = false;
     stageStarted = false;
+    timeForPlayers = LOBBY_TIME;
 
     //random seed initialization
-        std::random_device rd; 
-        std::mt19937 gen(rd());
+    std::random_device rd; 
+    std::mt19937 gen(rd());
 }
 
 gameLogic::~gameLogic()
 {
 }
 
-float gameLogic::getGlobalTime() const {
-    return this->globalTime;
+float gameLogic::getTimeForPlayers() const {
+    return this->timeForPlayers;
 }
 
 void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
@@ -122,7 +123,7 @@ bool gameLogic::gameTick(player players[4], GameServer* server) {
     float deltaTime = updateStateAndGetDelta(players, server);
 
     for(int i = 0; i < 4; i++) {
-        if(!players[i].getIsConnected() || players[i].getIsCaught()) continue;
+        if(!players[i].getIsConnected() || players[i].getPlayerState() != player::PlayerState::DEATH) continue;
         staminaHandler(players[i], deltaTime);
         playerMove(players[i], players, server);
     }
@@ -213,7 +214,7 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
     if(server->getGameStage() == GameState::LOBBY) return;
     for(int i = 0; i < 4; i++) {
         if(&currentPlayer == &players[i]) continue;
-        if(players[i].getIsCaught()) continue;
+        if(players[i].getPlayerState() != player::PlayerState::DEATH) continue;
 
         float otherX = players[i].getX(), otherY = players[i].getY();
 
@@ -221,12 +222,10 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
         if (!isColliding) continue;
         
         if(currentPlayer.getIsSeeker() == true) {
-            players[i].setIsCaught(true);
             players[i].setPlayerState(player::PlayerState::DEATH);
             return;
         }
         if(players[i].getIsSeeker() == true) {
-            currentPlayer.setIsCaught(true);
             currentPlayer.setPlayerState(player::PlayerState::DEATH);
             return;
         }
@@ -323,8 +322,9 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     //game state handler
     switch (server->getGameStage()) {
         case GameState::LOBBY: {
+            timeForPlayers = LOBBY_TIME - globalTime;
             //first check
-            if(connectedPlayers < 4 && globalTime <= 30.0f) break;
+            if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
 
             //case with no players in lobby
             if(connectedPlayers == 0) {
@@ -341,12 +341,12 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             //next stage
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
-            globalTime = 0.0f;
 
             break;
         }
         case GameState::COUNTDOWN: {
 
+            timeForPlayers = COUNTDOWN_TIME - globalTime;
             bool seekerOnline = players[seekerIndex].getIsConnected();
 
             if(connectedPlayers < 2 || !seekerOnline){
@@ -366,7 +366,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             }
 
             //next stage
-            if(globalTime > 15.0f) {
+            if(globalTime > COUNTDOWN_TIME) {
                 stageStarted = false;
                 server->setGameStage(GameState::GAME);
             }
@@ -375,8 +375,9 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
         case GameState::GAME: {
             //caught players
             int caughtPlayers = std::count_if(players, players + 4, [](player& p) {
-                return p.getIsCaught();
+                return p.getPlayerState() == player::PlayerState::DEATH;
             });
+            timeForPlayers = GAME_TIME - globalTime;
 
             bool seekerOnline = players[seekerIndex].getIsConnected();
 
@@ -389,7 +390,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             }
             
             //next stage (if game lasts more than 3 minutes or every hider is caught)
-            if(globalTime > 180.0f || caughtPlayers + 1 == connectedPlayers) {
+            if(globalTime > GAME_TIME || caughtPlayers + 1 == connectedPlayers) {
                 stageStarted = false;
                 server->setGameStage(GameState::GAME_OVER);
             }
@@ -397,7 +398,9 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
         }
         case GameState::GAME_OVER:
 
-            if(globalTime > 15.0f) {
+            timeForPlayers = GAME_OVER_TIME - globalTime;
+
+            if(globalTime > GAME_OVER_TIME) {
                 server->setIsRunning(false);
                 break;
             }
@@ -410,32 +413,3 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     lastTime = currentTime;
     return frameDelta.count();
 }
-
-bool gameLogic::suddenDisconnections(player players[4], GameServer* server, GameState state){
-    bool isSeekerOnline = 0;
-    int connectedPlayers = 0;
-
-    if(state == GameState::GAME && !isSeekerOnline && globalTime > 0.5f){
-        std::cout << "Seeker left the game. Hiders win. \n";
-        server->setGameStage(GameState::GAME_OVER);
-        server->setStageTimer(0.0f);
-        return true;
-    }
-    if(state == GameState::COUNTDOWN && !isSeekerOnline && globalTime > 0.5f){
-        std::cout << "Seeker left before start. Players back to the lobby \n";
-        server->setGameStage(GameState::LOBBY);
-        server->setStageTimer(0.0f);
-        for (int i = 0; i < 4; i++) {
-            if (players[i].getIsConnected()) {
-                server->resetPlayer(i);
-                players[i].setIsConnected(true);
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
-
-
-

@@ -1,7 +1,6 @@
 #pragma once
 #include "../shared/player.h"
 #include "../shared/contstants.h"
-#include "../shared/gameState.h"
 #include <chrono>
 #include <eigen3/Eigen/Dense>
 #include <random>
@@ -17,7 +16,7 @@ public:
     //setters
 
     //getters
-    float getGlobalTime() const;
+    float getTimeForPlayers() const;
     
     /**
      * @brief Handles main loop of the game. This method should be called per tick
@@ -36,6 +35,7 @@ private:
     std::chrono::steady_clock::time_point startTime;
     std::chrono::steady_clock::time_point lastTime;
     float globalTime;
+    float timeForPlayers;
     bool isStarted;
     bool stageStarted;
     Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> tileMap;
@@ -109,6 +109,4 @@ private:
      * @return false if map was loaded succesfully
      */
     bool loadMap();
-
-    
 };

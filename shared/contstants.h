@@ -21,4 +21,9 @@
 #define REGEN_RATE 20.0f
 #define MAX_STAMINA 100.0f
 
+#define LOBBY_TIME 30.0f
+#define COUNTDOWN_TIME 15.0f
+#define GAME_TIME 180.0f
+#define GAME_OVER_TIME 15.0f
+
 #endif
