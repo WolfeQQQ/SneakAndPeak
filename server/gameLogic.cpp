@@ -145,9 +145,7 @@ bool gameLogic::gameTick(player players[4], GameServer* server) {
     }
 
     float deltaTime = stateManager(players, server);
-    GameState state = server->getGameStage();
 
-    if(suddenDisconnections(players, server, state)) { return false; }
 
     //for-loop computing outcome for every player
     for(int i = 0; i < 4; i++) {
@@ -493,44 +491,7 @@ float gameLogic::stateManager(player players[4], GameServer* server) {
     return frameDelta.count();
 }
 
-bool gameLogic::suddenDisconnections(player players[4], GameServer* server, GameState state){
-    bool isSeekerOnline = 0;
-    int connectedPlayers = 0;
 
-    for (int i = 0; i < 4; i++) {
-        if (players[i].getIsConnected()) {
-            connectedPlayers++;
-            if (players[i].getIsSeeker()) {
-                isSeekerOnline = true;
-            }
-        }
-    }
-    if(state == GameState::COUNTDOWN && connectedPlayers < 2){
-        std::cout << "Not enough players to continue countdown.\n";
-        server->setGameStage(GameState::LOBBY);
-        server->setStageTimer(0.0f);
-        for (int i = 0; i < 4; i++) {
-            if (players[i].getIsConnected()) {
-                server->resetPlayer(i);
-                players[i].setIsConnected(true);
-            }
-        }
-        return true;
-    }
-    if(state == GameState::GAME && !isSeekerOnline && globalTime > 0.5f){
-        std::cout << "Seeker left the game. Hiders win. \n";
-        server->setGameStage(GameState::GAME_OVER);
-        server->setStageTimer(0.0f);
-        return true;
-    }
-    if(state == GameState::COUNTDOWN && !isSeekerOnline){
-        std::cout << "Seeker left before start. Players back to the lobby \n";
-        server->setGameStage(GameState::LOBBY);
-        server->setStageTimer(0.0f);
-        return true;
-    }
-    return false;
-}
 
 
 

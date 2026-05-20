@@ -55,6 +55,5 @@ private:
     //map loader
     bool loadMap();
 
-    //sudden disconnections
-    bool suddenDisconnections(player players[4], GameServer* server, GameState stage);
+    
 };
