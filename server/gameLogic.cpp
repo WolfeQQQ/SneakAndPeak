@@ -12,8 +12,6 @@
 #include <algorithm>
 #include <random>
 
-//<===========================TOOLS SECTION============================>
-
 gameLogic::gameLogic()
 {
     isStarted = false;
@@ -28,33 +26,20 @@ gameLogic::~gameLogic()
 {
 }
 
-//Getters
 float gameLogic::getGlobalTime() const {
     return this->globalTime;
 }
 
-//players stamina handler
 void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
 
-    //if(currentPlayer.getIsSeeker() == false) return;
+    //if(currentPlayer.getIsSeeker() == false) return; #TODO if shift_key hnalder for hiders is implemented
 
-    //variables
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float stamina = currentPlayer.getStamina();
     float currentSpeed = currentPlayer.getSpeed();
 
-    /*
-        *@brief: stamina usage and regeneration handler
-    
-        takin into account 5 states -> 
-        * key is clicked and stamina > 0
-        * key is clicked and stamina < 0
-        * key is not clicked and player is running (player no longer holds shift_key)
-        * key is not clicked and stamina < MAX_STAMINA
-        * key is not clicked and stamina > MAX_STAMINA
-    */
+    //Sprint handling
     if(currentPlayerInput.shift == true) {
-        //First state
         if(stamina > 0.0f) {
             float currentStamina = stamina - (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
@@ -64,64 +49,58 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
             }
             return;
         }
-        //Second state
+        //Stamina depleted while trying to sprint
         else {
             if(currentPlayer.getIsRunning() == true) {
                 currentPlayer.setSpeed(currentSpeed / 1.5);
-                if(stamina < 0.0f) currentPlayer.setStamina(0.0f);
+                if(stamina < 0.0f) currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
                 currentPlayer.setIsRunning(false);
             }
             return;
         }
     }
+    // Handle Walking
     else {
-        //Third state
         if(currentPlayerInput.shift == false && currentPlayer.getIsRunning() == true) {
             currentPlayer.setSpeed(currentSpeed / 1.5);
             currentPlayer.setIsRunning(false);
         }
-        //Fourth state
         if(stamina < MAX_STAMINA) {
             float currentStamina = stamina + (REGEN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
             return;
         }
-        //Fifth state
         else {
-            currentPlayer.setStamina(MAX_STAMINA);
+            currentPlayer.setStamina(MAX_STAMINA); // Clamp to max capacity
             return;
         }
     }
 }
 
-//loading tilemap
 bool gameLogic::loadMap() {
 
     std::ifstream plik("assets/map_temp.csv");
 
-    //error message no data to load
     if(!plik.is_open()) {
         std::cout << "CRITICAL ERROR! YO MAMA2FAT TO OPEN" << std::endl;
         return true;
     }
 
+    //pre-allocation for security and efficency
     tileMap.resize(MAP_HEIGHT, MAP_WIDTH);
 
     std::string linia;
     int y = 0;
 
-    //loading rows
+    //parsing line to line to ensure file size
     while (std::getline(plik, linia) && y < MAP_HEIGHT) {
         
-        //variables
         std::stringstream ss(linia);
         std::string komorka;
         int x = 0;
 
-        //loading rows
         while (std::getline(ss, komorka, ',') && x < MAP_WIDTH) {
             
-            //adding cuted row (for example "1")
             tileMap(y, x) = std::stoi(komorka);
             x++;
         }
@@ -131,148 +110,104 @@ bool gameLogic::loadMap() {
     return false;
 }
 
-//<===========================MAIN GAME LOOP===========================>
-
-//Main server logic  
 bool gameLogic::gameTick(player players[4], GameServer* server) {
 
-    //Game time start with first inicialization
-    if(isStarted == false) {
+    if(!isStarted) {
         bool crashFlag = loadMap();
         if(crashFlag) return true;
         isStarted = true;
-        return false;
+        return false; //First time do not compute anything for safety reasons
     }
 
-    float deltaTime = stateManager(players, server);
+    float deltaTime = updateStateAndGetDelta(players, server);
 
-    //for-loop computing outcome for every player
     for(int i = 0; i < 4; i++) {
-        if(players[i].getIsConnected() == false || players[i].getIsCaught() == true) continue;
+        if(!players[i].getIsConnected() || players[i].getIsCaught()) continue;
         staminaHandler(players[i], deltaTime);
         playerMove(players[i], players, server);
     }
     return false;
 }
 
-//<===========================PLAYER MOVEMENT==========================>
-
-//player move function
 void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer* server) {
-    //variables
+
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
-    float currentSpeed = currentPlayer.getSpeed(), directionX = 0.0f, directionY = 0.0f, adjustedSpeed = currentPlayer.getSpeed();
+    float currentSpeed = currentPlayer.getSpeed();
+    float directionX = 0.0f;
+    float directionY = 0.0f;
+
     if(currentPlayer.getIsSeeker() && server->getGameStage() == GameState::COUNTDOWN) return;
 
-    //adjusting speed for diagonal movement
-    if(currentPlayerInput.up == true) directionY += 1.0f;
-    if(currentPlayerInput.down == true) directionY += -1.0f;
-    if(currentPlayerInput.right == true) directionX += 1.0f;
-    if(currentPlayerInput.left == true) directionX += -1.0f;
+    if(currentPlayerInput.down) directionY += 1.0f;
+    if(currentPlayerInput.up) directionY += -1.0f;
+    if(currentPlayerInput.right) directionX += 1.0f;
+    if(currentPlayerInput.left) directionX += -1.0f;
+
     if(directionX == 0 && directionY == 0) {
         currentPlayer.setPlayerState(player::PlayerState::IDLE);
         return;
     }
-    currentSpeed = std::sqrt((directionX * directionX) + (directionY * directionY));
-    adjustedSpeed = 1.0f/currentSpeed * currentPlayer.getSpeed();
+
+    float magnitude = std::sqrt((directionX * directionX) + (directionY * directionY));
+    float adjustedSpeed = 1.0f/magnitude * currentSpeed;
 
     currentPlayer.setPlayerState(player::PlayerState::WALK);
-    //UP
-    if(currentPlayerInput.up == true) {
-        float direction = currentPlayer.getY() - adjustedSpeed;
-        currentPlayer.setY(direction);
-        currentPlayer.setDirection(player::Direction::UP);
-        collision(currentPlayer, players, 0, server);
+
+    if(directionY != 0) {
+        player::Direction animationDir = directionY > 0.0f ? player::Direction::DOWN : player::Direction::UP;
+        float newY = currentPlayer.getY() + (adjustedSpeed * directionY);
+        
+        currentPlayer.setY(newY);
+        currentPlayer.setDirection(animationDir);
+
+        collision(currentPlayer, players, animationDir, server);
     }
-    //DOWN
-    if(currentPlayerInput.down == true) {
-        float direction = currentPlayer.getY() + adjustedSpeed;
-        currentPlayer.setY(direction);
-        currentPlayer.setDirection(player::Direction::DOWN);
-        collision(currentPlayer, players, 1, server);
-    }
-    //RIGHT
-    if(currentPlayerInput.right == true) {
-        float direction = currentPlayer.getX() + adjustedSpeed;
-        currentPlayer.setX(direction);
-        currentPlayer.setDirection(player::Direction::RIGHT);
-        collision(currentPlayer, players, 2, server);
-    }
-    //LEFT
-    if(currentPlayerInput.left == true) {
-        float direction = currentPlayer.getX() - adjustedSpeed;
-        currentPlayer.setX(direction);
-        currentPlayer.setDirection(player::Direction::LEFT);
-        collision(currentPlayer, players, 3, server);
+
+    if(directionX != 0) {
+        player::Direction animationDir = directionX > 0.0f ? player::Direction::RIGHT : player::Direction::LEFT;
+        float newX = currentPlayer.getX() + (adjustedSpeed * directionX);
+        
+        currentPlayer.setX(newX);
+        currentPlayer.setDirection(animationDir);
+
+        collision(currentPlayer, players, animationDir, server);
     }
 }
 
-//collision function with players and tilemap
-void gameLogic::collision(player& currentPlayer, player players[4], int directionFlag, GameServer* server) {
+void gameLogic::collision(player& currentPlayer, player players[4], player::Direction directionFlag, GameServer* server) {
 
-    //variables to calculate collsion
     float currentX = currentPlayer.getX(), currentY = currentPlayer.getY();
 
-    //min max X and min max Y
     int playerPosOnGridXMin = (int)currentPlayer.getX()/ TILE_SIZE;
     int playerPosOnGridYMin = (int)currentPlayer.getY()/ TILE_SIZE;
     int playerPosOnGridXMax = ((int)currentPlayer.getX() + PLAYER_WIDTH) / TILE_SIZE;
     int playerPosOnGridYMax = ((int)currentPlayer.getY() + PLAYER_LENGTH) / TILE_SIZE;
-    
-    switch (directionFlag) {
-    case 0: //UP
 
-        //tile map collision check
-        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMin) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMin, directionFlag);
-            break;
-        }
-        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMax) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMin, directionFlag);
-            break;
-        };
+    if(currentX < 0 || currentY < 0 || currentX + PLAYER_WIDTH >= MAP_WIDTH * TILE_SIZE || currentY + PLAYER_LENGTH >= MAP_HEIGHT * TILE_SIZE) {
+        currentPlayer.setPlayerState(player::PlayerState::DEATH);
+        return;
+    }
 
-        break;
-    
-    case 1: //DOWN
-        //tile map collision check
-        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMin) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMax, directionFlag);
-            break;
-        }
-        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMax) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMax, directionFlag);
-            break;
-        };
-        break;
-        
-    case 2: // RIGHT
+    if(directionFlag == player::Direction::UP || directionFlag == player::Direction::DOWN) {
 
-        //tile map collision check
-        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMax) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMin, directionFlag);
-            break;
-        }
-        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMax) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMax, playerPosOnGridYMax, directionFlag);
-            break;
-        };
-        break;
-    
-    case 3: //LEFT
+        int otherY = directionFlag == player::Direction::UP ? playerPosOnGridYMin : playerPosOnGridYMax;
+        float otherX = -1.0f;
 
-        //tile map collision check
-        if(tileMap(playerPosOnGridYMin, playerPosOnGridXMin) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMin, directionFlag);
-            break;
-        }
-        if(tileMap(playerPosOnGridYMax, playerPosOnGridXMin) != -1) {
-            checkCollision(currentPlayer, currentX, currentY, playerPosOnGridXMin, playerPosOnGridYMax, directionFlag);
-            break;
-        };
+        if(tileMap(otherY, playerPosOnGridXMin) != -1) otherX = (float)playerPosOnGridXMin * TILE_SIZE;
+        else if(tileMap(otherY, playerPosOnGridXMax) != -1) otherX = (float)playerPosOnGridXMax * TILE_SIZE;
 
-    default:
-        break;
+        if(otherX != -1.0f) aabbAlgorithm(currentPlayer, currentX, currentY, otherX, (float)(otherY * TILE_SIZE), directionFlag, true);
+    }
+
+    if(directionFlag == player::Direction::RIGHT || directionFlag == player::Direction::LEFT) {
+
+        int otherX = directionFlag == player::Direction::LEFT ? playerPosOnGridXMin : playerPosOnGridXMax;
+        float otherY = -1.0f;
+
+        if(tileMap(playerPosOnGridYMin, otherX) != -1) otherY = (float)playerPosOnGridYMin * TILE_SIZE;
+        else if(tileMap(playerPosOnGridYMax, otherX) != -1) otherY = (float)playerPosOnGridYMax * TILE_SIZE;
+
+        if(otherY != -1.0f) aabbAlgorithm(currentPlayer, currentX, currentY, (float)(otherX * TILE_SIZE), otherY, directionFlag, true);
     }
 
     if(server->getGameStage() == GameState::LOBBY) return;
@@ -280,13 +215,11 @@ void gameLogic::collision(player& currentPlayer, player players[4], int directio
         if(&currentPlayer == &players[i]) continue;
         if(players[i].getIsCaught()) continue;
 
-        //variables for calculating edge points
         float otherX = players[i].getX(), otherY = players[i].getY();
 
-        bool isColliding = aabbAlgorithm(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
+        bool isColliding = aabbAlgorithm(currentPlayer, currentX, currentY, otherX, otherY, directionFlag, false);
         if (!isColliding) continue;
         
-        //collision handling
         if(currentPlayer.getIsSeeker() == true) {
             players[i].setIsCaught(true);
             players[i].setPlayerState(player::PlayerState::DEATH);
@@ -300,47 +233,47 @@ void gameLogic::collision(player& currentPlayer, player players[4], int directio
     }
 }
 
-//tile map collsion method
-void gameLogic::checkCollision(player& currentPlayer, float currentX, float currentY, int playerPosOnGridX, int playerPosOnGridY, float directionFlag) {
-    //variables for calculating edge points
-        float otherX = (float)playerPosOnGridX * TILE_SIZE, otherY = (float)playerPosOnGridY * TILE_SIZE;
+bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, player::Direction directionFlag, bool isTileMap) {
 
-        aabbAlgorithmTileMap(currentPlayer, currentX, currentY, otherX, otherY, directionFlag);
-}
-
-//AABB algorithm function for players
-bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag) {
-
-    float widthPoint = PLAYER_WIDTH/2;
-    float lengthPoint = PLAYER_LENGTH/2;
     float diffrence = 0.0f;
+    float width;
+    float length;
+
+    if(isTileMap) {
+        width = (float)TILE_SIZE;
+        length = (float)TILE_SIZE;
+    }
+    else {
+        width = (float)PLAYER_WIDTH;
+        length = (float)PLAYER_LENGTH;
+    }
 
     //AABB algorithm calculations
-    if ((currentX - widthPoint) > (otherX + widthPoint)) return false;
-    if ((currentX + widthPoint) < (otherX - widthPoint)) return false;
-    if ((currentY - lengthPoint) > (otherY + lengthPoint)) return false;
-    if ((currentY + lengthPoint) < (otherY - lengthPoint)) return false;
+    if ((currentX) > (otherX + width)) return false;
+    if ((currentX + PLAYER_WIDTH) < (otherX)) return false;
+    if ((currentY) > (otherY + length)) return false;
+    if ((currentY + PLAYER_LENGTH) < (otherY)) return false;
 
     //Adjusting current player position based on AABB algorithm calculations
     switch (directionFlag)
     {
-    case 0: //up
-        diffrence = (otherY + lengthPoint) - (currentY - lengthPoint) + 0.1f;
+    case player::Direction::UP:
+        diffrence = (otherY + length) - (currentY) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() + diffrence);
         break;
         
-    case 1: //down
-        diffrence = (currentY + lengthPoint) - (otherY - lengthPoint) + 0.1f;
+    case player::Direction::DOWN:
+        diffrence = (currentY + PLAYER_LENGTH) - (otherY) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() - diffrence);
         break;
 
-    case 2: //right
-        diffrence = (currentX + widthPoint) - (otherX - widthPoint) + 0.1f;
+    case player::Direction::RIGHT:
+        diffrence = (currentX + PLAYER_WIDTH) - (otherX) + 0.1f;
         currentPlayer.setX(currentPlayer.getX() - diffrence);
         break;
             
-    case 3: //left
-        diffrence = (otherX + widthPoint) - (currentX - widthPoint) + 0.1f;
+    case player::Direction::LEFT:
+        diffrence = (otherX + width) - (currentX) + 0.1f;
         currentPlayer.setX(currentPlayer.getX() + diffrence);
         break;
 
@@ -350,48 +283,8 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     return true;
 }
 
-//AABB algorithm function for tilemap
-void gameLogic::aabbAlgorithmTileMap(player& currentPlayer, float currentX, float currentY, float otherX, float otherY, int directionFlag) {
-    float diffrence = 0.0f;
-
-    //AABB algorithm calculations
-    // if ((currentX) > (otherX + (float)(TILE_SIZE))) return;
-    if ((currentX + PLAYER_WIDTH) < (otherX)) return;
-    if ((currentY) > (otherY + (float)(TILE_SIZE))) return;
-    if ((currentY + PLAYER_LENGTH) < (otherY)) return;
-
-    // Adjusting current player position based on AABB algorithm calculations
-    switch (directionFlag)
-    {
-    case 0: //up
-        diffrence = (otherY + (float)(TILE_SIZE)) - (currentY) + 0.1f;
-        currentPlayer.setY(currentPlayer.getY() + diffrence);
-        break;
-        
-    case 1: //down
-        diffrence = (currentY + PLAYER_LENGTH) - (otherY) + 0.1f;
-        currentPlayer.setY(currentPlayer.getY() - diffrence);
-        break;
-
-    case 2: //right
-        diffrence = (currentX + PLAYER_WIDTH) - (otherX) + 0.1f;
-        currentPlayer.setX(currentPlayer.getX() - diffrence);
-        break;
-            
-    case 3: //left
-        diffrence = (otherX + (float)(TILE_SIZE)) - (currentX) + 0.1f;
-        currentPlayer.setX(currentPlayer.getX() + diffrence);
-        break;
-
-    default:
-        break;
-    }
-}
-
-//<===========================GAME STATE===============================>
-
 //game state manager method
-float gameLogic::stateManager(player players[4], GameServer* server) {
+float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     //variables
     auto currentTime = std::chrono::steady_clock::now();
     int connectedPlayers = std::count_if(players, players + 4, [](player& p) {
@@ -453,6 +346,24 @@ float gameLogic::stateManager(player players[4], GameServer* server) {
         }
         case GameState::COUNTDOWN: {
 
+            bool seekerOnline = players[seekerIndex].getIsConnected();
+
+            if(connectedPlayers < 2 || !seekerOnline){
+
+                if(seekerOnline) std::cout << "Not enough players to continue countdown.\n";
+                else std::cout << "Seeker left before start. Players back to the lobby \n";
+
+                server->setGameStage(GameState::LOBBY);
+                for (int i = 0; i < 4; i++) {
+                    if (players[i].getIsConnected()) {
+                        server->resetPlayer(i);
+                        players[i].setIsConnected(true);
+                    }
+                }
+                stageStarted = false;
+                break;
+            }
+
             //next stage
             if(globalTime > 15.0f) {
                 stageStarted = false;
@@ -465,6 +376,16 @@ float gameLogic::stateManager(player players[4], GameServer* server) {
             int caughtPlayers = std::count_if(players, players + 4, [](player& p) {
                 return p.getIsCaught();
             });
+
+            bool seekerOnline = players[seekerIndex].getIsConnected();
+
+            if(!seekerOnline){
+                std::cout << "Seeker left the game. Hiders win. \n";
+
+                server->setGameStage(GameState::GAME_OVER);
+                stageStarted = false;
+                break;
+            }
             
             //next stage (if game lasts more than 3 minutes or every hider is caught)
             if(globalTime > 180.0f || caughtPlayers + 1 == connectedPlayers) {
@@ -489,6 +410,29 @@ float gameLogic::stateManager(player players[4], GameServer* server) {
     return frameDelta.count();
 }
 
+bool gameLogic::suddenDisconnections(player players[4], GameServer* server, GameState state){
+    bool isSeekerOnline = 0;
+    int connectedPlayers = 0;
 
+    if(state == GameState::GAME && !isSeekerOnline && globalTime > 0.5f){
+        std::cout << "Seeker left the game. Hiders win. \n";
+        server->setGameStage(GameState::GAME_OVER);
+        server->setStageTimer(0.0f);
+        return true;
+    }
+    if(state == GameState::COUNTDOWN && !isSeekerOnline && globalTime > 0.5f){
+        std::cout << "Seeker left before start. Players back to the lobby \n";
+        server->setGameStage(GameState::LOBBY);
+        server->setStageTimer(0.0f);
+        for (int i = 0; i < 4; i++) {
+            if (players[i].getIsConnected()) {
+                server->resetPlayer(i);
+                players[i].setIsConnected(true);
+            }
+        }
+        return true;
+    }
+    return false;
+}
 
 
