@@ -282,7 +282,7 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     return true;
 }
 
-//game state manager method
+//game state manager method TODO (optimalization)
 float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     //variables
     auto currentTime = std::chrono::steady_clock::now();
