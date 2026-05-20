@@ -5,6 +5,8 @@
 #include <eigen3/Eigen/Dense>
 #include <random>
 
+class GameServer;
+
 class gameLogic
 {
 public:
