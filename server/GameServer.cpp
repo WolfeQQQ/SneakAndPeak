@@ -152,7 +152,8 @@ void GameServer::StateToUpload(){
     
     GameStatePacket packet;
     packet.stage = currentState;
-    packet.timer = logic.getGlobalTime();
+    packet.timer = logic->getTimeForPlayers();
+    std::cout << logic->getTimeForPlayers() << std::endl;
     std::memcpy(packet.players, players, sizeof(players));
 
     for(int i = 0; i < MAX_CLIENTS; i++){
