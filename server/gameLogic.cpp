@@ -1,5 +1,5 @@
-#include "gameLogic.h"
 #include "GameServer.h"
+#include "gameLogic.h"
 #include "../shared/player.h"
 #include "../shared/contstants.h"
 #include "../shared/gameState.h"
@@ -341,6 +341,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             //next stage
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
+            globalTime = 0.0f;
 
             break;
         }
@@ -434,5 +435,7 @@ bool gameLogic::suddenDisconnections(player players[4], GameServer* server, Game
     }
     return false;
 }
+
+
 
 

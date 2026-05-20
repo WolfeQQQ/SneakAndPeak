@@ -1,6 +1,7 @@
 #pragma once
 #include "../shared/player.h"
 #include "../shared/contstants.h"
+#include "../shared/gameState.h"
 #include <chrono>
 #include <eigen3/Eigen/Dense>
 #include <random>
@@ -109,12 +110,5 @@ private:
      */
     bool loadMap();
 
-    /**
-     * @brief
-     * 
-     * @param
-     * @param
-     * @param
-    */
-    bool suddenDisconnections(player players[4], GameServer* server, GameState state);
+    
 };
