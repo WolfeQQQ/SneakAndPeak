@@ -7,15 +7,16 @@
 #include "../shared/contstants.h"
 #include "../shared/player.h"
 #include "../shared/gameState.h"
-#include "gameLogic.h"
 
 
+
+class gameLogic;
 
 class GameServer {
 private:
     int listenSocket;
     bool isRunning;
-    gameLogic logic;
+    gameLogic* logic;
     
     std::mutex stateMutex;
     
@@ -33,9 +34,8 @@ private:
 
     void HandleNewConnection(int clientSock);
     void ClientListener(int playerId, int sock);
-    void ResetPlayer(int playerId);
     void GameUpdateLoop();
-
+    
 public:
     GameServer();
     ~GameServer();
@@ -60,4 +60,7 @@ public:
     void setIsRunning(bool running){ 
         isRunning = running; 
     }
+    void resetPlayer(int playerId);
+
+
 };

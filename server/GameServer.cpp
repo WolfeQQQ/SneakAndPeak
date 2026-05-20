@@ -1,4 +1,5 @@
 #include "GameServer.h"
+#include "gameLogic.h"
 #include <iostream>
 #include <cstring>
 #include <chrono>
@@ -14,11 +15,11 @@ GameServer::GameServer(){
     stateTimer = 0.0f;
     std::memset(clientSockets, 0, sizeof(clientSockets));
     std::memset(clientInputs, 0, sizeof(clientInputs));
-
+    logic = new gameLogic();
 }
 
 //Destructor
-GameServer::~GameServer() {Stop(); }
+GameServer::~GameServer() {Stop(); delete logic;}
 
 //The main method that creates a socket and handles loops for accepting new clients
 void GameServer::Start(){
@@ -93,6 +94,7 @@ void GameServer::HandleNewConnection(int clientSock){
 void GameServer::ClientListener(int playerId, int sock){
     player::ClientInput tempinput;
     int readSize;
+
     while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), MSG_WAITALL)) > 0){
          std::lock_guard<std::mutex> lock(stateMutex);
          clientInputs[playerId] = tempinput;
@@ -101,7 +103,7 @@ void GameServer::ClientListener(int playerId, int sock){
     {
         std::lock_guard<std::mutex> lock(stateMutex);
 
-        ResetPlayer(playerId);
+        resetPlayer(playerId);
 
         clientSockets[playerId] = 0;
         std::cout << "Player" << playerId << "left the game. \n";
@@ -109,7 +111,7 @@ void GameServer::ClientListener(int playerId, int sock){
     close(sock);
 }
 
-void GameServer::ResetPlayer(int playerId) {
+void GameServer::resetPlayer(int playerId) {
     players[playerId].setIsConnected(false);
     players[playerId].setIsSeeker(false);
     players[playerId].setIsCaught(false);
@@ -133,7 +135,7 @@ void GameServer::GameUpdateLoop() {
                 }
             }
 
-            bool toStop = logic.gameTick(players, this);
+            bool toStop = logic->gameTick(players, this);
             if(toStop) Stop();
         }
 
