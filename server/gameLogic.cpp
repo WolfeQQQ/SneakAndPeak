@@ -123,7 +123,7 @@ bool gameLogic::gameTick(player players[4], GameServer* server) {
     float deltaTime = updateStateAndGetDelta(players, server);
 
     for(int i = 0; i < 4; i++) {
-        if(!players[i].getIsConnected() || players[i].getPlayerState() != player::PlayerState::DEATH) continue;
+        if(!players[i].getIsConnected() || players[i].getPlayerState() == player::PlayerState::DEATH) continue;
         staminaHandler(players[i], deltaTime);
         playerMove(players[i], players, server);
     }
