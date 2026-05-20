@@ -13,6 +13,8 @@ player::player() {
     this->isRunning = false;
     this->abilityCooldown = 0.0f;
     direction = player::Direction::DOWN;
+    playerstate = player::PlayerState::IDLE;
+    
 
     this->input.up = false;
     this->input.down = false;
