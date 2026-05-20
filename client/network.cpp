@@ -57,25 +57,29 @@ void Network::Disconnect() {
 }
 
 void Network::SendInput(player::ClientInput input) {
-    if (!connected || sock == -1) return;
+    if (!connected || sock == -1) return ;
 
     if (send(sock, &input, sizeof(player::ClientInput), 0) < 0) {
         std::cerr << "[Network] Blad podczas wysylania klawiszy!\n";
     }
 }
 
-void Network::ReceiveState(player players[4]) {
-    if(!connected || sock == -1) return;
+bool Network::ReceiveState(GameStatePacket& packet) {
+    if(!connected || sock == -1) return false;
     
-    int bytesRead = recv(sock, players, sizeof(player) * 4, MSG_DONTWAIT);
-
-    if (bytesRead > 0) {
-        std::cout << "[Network] Otrzymano stan od serwera.\n";
-    } else if (bytesRead == 0) {
+    int available = recv(sock, &packet, sizeof(GameStatePacket), MSG_PEEK |MSG_DONTWAIT);
+    
+    if (available == 0) {
         std::cerr << "[Network] Polaczenie zamkniete przez serwer.\n";
         Disconnect();
+        return false;
     } 
 
+    if (available == sizeof(GameStatePacket)) {
+        recv(sock, &packet, sizeof(GameStatePacket), MSG_DONTWAIT);
+        return true;
+    }
+    return false;
 }
 
 
