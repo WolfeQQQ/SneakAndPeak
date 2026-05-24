@@ -16,6 +16,11 @@ GameServer::GameServer(){
     std::memset(clientSockets, 0, sizeof(clientSockets));
     std::memset(clientInputs, 0, sizeof(clientInputs));
     logic = new gameLogic();
+
+    auto now = std::chrono::steady_clock::now();
+    for(int i = 0; i < MAX_CLIENTS; i++){
+        lastInputTime[i] = now;
+    }
 }
 
 //Destructor
@@ -59,8 +64,6 @@ void GameServer::HandleNewConnection(int clientSock){
         if(players[i].getIsConnected()!=true){
             assignedId = i;
             clientSockets[i] = clientSock;
-            players[i].setIsConnected(true);
-            players[i].setId(i);
 
 
             players[i].setIsConnected(true);
@@ -96,8 +99,18 @@ void GameServer::ClientListener(int playerId, int sock){
     int readSize;
 
     while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), MSG_WAITALL)) > 0){
-         std::lock_guard<std::mutex> lock(stateMutex);
-         clientInputs[playerId] = tempinput;
+        auto now = std::chrono::steady_clock::now();
+        auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastInputTime[playerId]).count();
+
+
+        if(elapsedMs > 10){
+            lastInputTime[playerId] = now;
+            std::lock_guard<std::mutex> lock(stateMutex);
+            clientInputs[playerId] = tempinput;
+        }
+        else{
+            clientInputs[playerId] = tempinput;
+        }
     }
 
     {
@@ -121,6 +134,7 @@ void GameServer::resetPlayer(int playerId) {
     players[playerId].setStamina(100.0f);
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
+    lastInputTime[playerId] = std::chrono::steady_clock::now();
 }
 
 void GameServer::GameUpdateLoop() {

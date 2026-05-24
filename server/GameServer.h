@@ -29,6 +29,8 @@ private:
 
     int clientSockets[MAX_CLIENTS];
 
+    std::chrono::steady_clock::time_point lastInputTime[MAX_CLIENTS];
+
     GameState currentState;
     float stateTimer;
 
