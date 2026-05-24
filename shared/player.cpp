@@ -11,6 +11,7 @@ player::player() {
     this->isCaught = false;
     this->isSeeker = false;
     this->isRunning = false;
+    this->isViewing = false;
     this->abilityCooldown = 0.0f;
     direction = player::Direction::DOWN;
     playerstate = player::PlayerState::IDLE;
@@ -58,6 +59,9 @@ bool player::getIsConnected() const {
 bool player::getIsRunning() const {
     return this->isRunning;
 }
+bool player::getIsViewing() const {
+    return this->isViewing;
+}
 player::ClientInput player::getClientInput() const {
     return this->input;
 }
@@ -100,6 +104,9 @@ void player::setIsConnected(bool newConnected) {
 }
 void player::setIsRunning(bool newRunning) {
     this->isRunning = newRunning;
+}
+void player::setViewing(bool changedViewing) {
+    this->isViewing = changedViewing;
 }
 void player::setInput(ClientInput& newInput) {
     this->input = newInput;

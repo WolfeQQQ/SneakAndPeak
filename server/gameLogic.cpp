@@ -12,8 +12,7 @@
 #include <algorithm>
 #include <random>
 
-gameLogic::gameLogic()
-{
+gameLogic::gameLogic() {
     isStarted = false;
     stageStarted = false;
     timeForPlayers = LOBBY_TIME;
@@ -23,9 +22,7 @@ gameLogic::gameLogic()
     std::mt19937 gen(rd());
 }
 
-gameLogic::~gameLogic()
-{
-}
+gameLogic::~gameLogic() {}
 
 float gameLogic::getTimeForPlayers() const {
     return this->timeForPlayers;
@@ -33,38 +30,46 @@ float gameLogic::getTimeForPlayers() const {
 
 void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
 
-    //if(currentPlayer.getIsSeeker() == false) return; #TODO if shift_key hnalder for hiders is implemented
-
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float stamina = currentPlayer.getStamina();
     float currentSpeed = currentPlayer.getSpeed();
 
     //Sprint handling
-    if(currentPlayerInput.shift == true) {
+    if(currentPlayerInput.shift) {
         if(stamina > 0.0f) {
             float currentStamina = stamina - (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
-            if(currentPlayer.getIsRunning() == false) {
+            if(currentPlayer.isSeeker() && !currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed * 1.5);
                 currentPlayer.setIsRunning(true);
+            }
+            else if(!currentPlayer.isSeeker && !currentPlayer.getIsViewing()) {
+                currentPlayer.setViewing(true);
             }
             return;
         }
         //Stamina depleted while trying to sprint
         else {
-            if(currentPlayer.getIsRunning() == true) {
+            if(currentPlayer.isSeeker() && currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed / 1.5);
                 if(stamina < 0.0f) currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
                 currentPlayer.setIsRunning(false);
+            }
+            else if(!currentPlayer.isSeeker && currentPlayer.getIsViewing()) {
+                currentPlayer.setViewing(false);
             }
             return;
         }
     }
     // Handle Walking
     else {
-        if(currentPlayerInput.shift == false && currentPlayer.getIsRunning() == true) {
+        if(!currentPlayerInput.shift && currentPlayer.getIsRunning()) {
             currentPlayer.setSpeed(currentSpeed / 1.5);
             currentPlayer.setIsRunning(false);
+            currentPlayer.setViewing(false);
+        }
+        if(!currentPlayerInput.shift && currentPlayer.getIsViewing()) {
+            currentPlayer.setViewing(false);
         }
         if(stamina < MAX_STAMINA) {
             float currentStamina = stamina + (REGEN_RATE * deltaTime);
@@ -214,7 +219,7 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
     if(server->getGameStage() == GameState::LOBBY) return;
     for(int i = 0; i < 4; i++) {
         if(&currentPlayer == &players[i]) continue;
-        if(players[i].getPlayerState() != player::PlayerState::DEATH) continue;
+        if(players[i].getPlayerState() == player::PlayerState::DEATH) continue;
 
         float otherX = players[i].getX(), otherY = players[i].getY();
 
@@ -284,13 +289,12 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
 
 //game state manager method TODO (optimalization)
 float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
-    //variables
+
     auto currentTime = std::chrono::steady_clock::now();
     int connectedPlayers = std::count_if(players, players + 4, [](player& p) {
         return p.getIsConnected();
     });
 
-    //First time stage initalization
     if(!stageStarted) {
         startTime = currentTime;
         lastTime = startTime;
@@ -298,7 +302,6 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
 
         //drawing seeker
         if(server->getGameStage() == GameState::COUNTDOWN) {
-            //adjusting possible seeker candidates
             int possibleSeekers[4];
             int count = 0;
             for(int i = 0; i < 4; i++) {
@@ -307,15 +310,12 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
                     count++;
                 }
             }
-            
-            //drawing seeker
             std::uniform_int_distribution<> distrib(0, count - 1);
             seekerIndex = possibleSeekers[distrib(gen)];
             players[seekerIndex].setIsSeeker(true);
         }
     }
 
-    //Game time calculations
     std::chrono::duration<float> elapsed = currentTime - startTime;
     globalTime = elapsed.count();
 
@@ -326,19 +326,17 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             //first check
             if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
 
-            //case with no players in lobby
             if(connectedPlayers == 0) {
                 startTime = currentTime;
                 lastTime = startTime;
                 break;
             }
-            //case with not enough players (crushes server... probably)
+
             if(connectedPlayers < 2) {
                 server->setIsRunning(false);
                 break;
             }
 
-            //next stage
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
 
@@ -365,7 +363,6 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
                 break;
             }
 
-            //next stage
             if(globalTime > COUNTDOWN_TIME) {
                 stageStarted = false;
                 server->setGameStage(GameState::GAME);
