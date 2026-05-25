@@ -41,7 +41,6 @@ void gameLogic::staminaHandler(player& currentPlayer,float deltaTime) {
 
     if(abilityCooldown > 0) {
         currentPlayer.setAbilityCooldown(abilityCooldown - deltaTime);
-        std::cout << "ABILITYCOOLDOWN: " << abilityCooldown <<std::endl;
 
         if(currentPlayer.getViewingSpeed()) {
             currentPlayer.setSpeed(currentSpeed * 1.4);
@@ -83,9 +82,6 @@ void gameLogic::staminaHandler(player& currentPlayer,float deltaTime) {
                     currentPlayer.setIsRunning(true);
                 }
             }
-            else if(!currentPlayer.getIsSeeker() && !currentPlayer.getIsViewing()) {
-                currentPlayer.setViewing(true);
-            }
             return;
         }
         //Stamina depleted while trying to sprint
@@ -111,10 +107,6 @@ void gameLogic::staminaHandler(player& currentPlayer,float deltaTime) {
         if(currentPlayer.getIsRunning()) {
             currentPlayer.setSpeed(currentSpeed / 1.5);
             currentPlayer.setIsRunning(false);
-            currentPlayer.setViewing(false);
-        }
-        if(!currentPlayerInput.shift && currentPlayer.getIsViewing()) {
-            currentPlayer.setViewing(false);
         }
         if(currentPlayer.getIsViewing()) {
             currentPlayer.setAbilityCooldown(ABILITY_COOLDOWN);
