@@ -2,9 +2,7 @@
 #include "menuScreen.h"
 #include "inGameScreen.h"
 #include "../shared/contstants.h"
-
-// another screens
-
+// #include more_screens
 #include "raylib.h"
 
 /*
@@ -12,25 +10,28 @@ Main application manager, responsible for initializing the window and managing t
 Handles the current state of the application and transitions beetween different screens.
 */
 
+// Constructor, initializes the application window and sets the initial state
 GameApp::GameApp() {
-    InitWindow(1280,720, "Sneak&Peak"); // Initialize the window with a title
-    //SetTargetFPS(60);
-    SetExitKey(0);
-    changeState(AppState::MAIN_MENU); // Start with the main menu
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sneak&Peak"); // Initialize the window with a title
+    SetExitKey(0); // Disable the default ESC key behavior
+
+    changeState(AppState::MAIN_MENU); // Game Starts with the main menu
 }
 
+// Destructor, cleans up resources
 GameApp::~GameApp() {
-    // Destructor code 
-    CloseWindow(); 
+    CloseWindow(); // :O
 }
 
+// Main game loop, handles updating and drawing
 void GameApp::run(){
-    while(!WindowShouldClose() && currentState != AppState::EXIT){
+    while(!WindowShouldClose() && currentState != AppState::EXIT){  // Loop until the window should close or the state is EXIT
         update();
         draw();
     }
 }
 
+// Method that handles the application state changes and calls the update method of the current screen
 void GameApp::update(){
     if(currentScreen){
         AppState newState = currentScreen->update();
@@ -41,6 +42,7 @@ void GameApp::update(){
 
 }
 
+// Simply calls the draw method of the current screen
 void GameApp::draw(){
     BeginDrawing();
     ClearBackground(BLACK);
@@ -50,17 +52,18 @@ void GameApp::draw(){
     EndDrawing();
 }
 
+// Game's state manager, Destroy the current screen and create a new one based on the state
 void GameApp::changeState(AppState newState){
     currentState = newState;
     switch(newState){
         case AppState::MAIN_MENU:
             currentScreen = std::make_unique<MenuScreen>();
             break;
-        case AppState::CONNECTING:
+        case AppState::CONNECTING:  // State that attempts to conect to the server, if successful, starts the game.
 
             //currentScreen = std::make_unique<ConnectingScreen>();
 
-            if(networkClient.ConnectToServer("127.0.0.1", 5000, &playerId)==true) //change to constants.h port
+            if(networkClient.ConnectToServer(SERVER_IP, SERVER_PORT, &playerId)==true)
             { //MOVE TO CONNECTING SCREEN
                 changeState(AppState::IN_GAME);
             } 
