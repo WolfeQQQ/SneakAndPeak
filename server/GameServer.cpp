@@ -155,11 +155,49 @@ void GameServer::GameUpdateLoop() {
                 }
             }
 
+            if(currentState == GameState::GAME_OVER){
+                int connectedPlayers = 0;
+                bool voteBackToLobby = false;
+
+                for(int i = 0 ; i < MAX_CLIENTS; i++){
+                    if(players[i].getIsConnected()){
+                        connectedPlayers ++;
+                        if(clientInputs[i].backToLobby){
+                            voteBackToLobby = true;
+                        }
+                    }
+
+                }
+
+                if(connectedPlayers == 0){
+                    std::cout << "closing server all players left\n";
+                    Stop();
+                    break;
+                }
+
+                if(voteBackToLobby){
+                    std::cout << " game reset\n";
+                    currentState = GameState::LOBBY;
+
+                    for (int i = 0; i < MAX_CLIENTS; i++) {
+                        if (players[i].getIsConnected()) {
+                            resetPlayer(i);
+                            players[i].setIsConnected(true);
+                        }
+                    }
+                }
+            }
+            
+
+            if(isRunning){
             bool toStop = logic->gameTick(players, this);
             if(toStop) Stop();
+            }
         }
 
-        StateToUpload();
+        if (isRunning) {
+            StateToUpload();
+        }
         auto endTime = std::chrono::steady_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         std::this_thread::sleep_for(std::chrono::milliseconds(config.getTickDelay()) - frameDuration);
