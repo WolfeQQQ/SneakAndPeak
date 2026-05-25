@@ -28,10 +28,12 @@ GameServer::~GameServer() {Stop(); delete logic;}
 
 //The main method that creates a socket and handles loops for accepting new clients
 void GameServer::Start(){
+    config.loadConfig("serverConfig.txt");
+    
     listenSocket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
+    serverAddr.sin_port = htons(config.getPort());
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
@@ -160,7 +162,7 @@ void GameServer::GameUpdateLoop() {
         StateToUpload();
         auto endTime = std::chrono::steady_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::this_thread::sleep_for(std::chrono::milliseconds(TICK_DELAY_MS) - frameDuration);
+        std::this_thread::sleep_for(std::chrono::milliseconds(config.getTickDelay()) - frameDuration);
     }
 }
 

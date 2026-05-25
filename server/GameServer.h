@@ -7,6 +7,7 @@
 #include "../shared/contstants.h"
 #include "../shared/player.h"
 #include "../shared/gameState.h"
+#include "configManager.h"
 
 
 // Forward declaration to break potential circular dependencies
@@ -18,6 +19,7 @@ class gameLogic;
  */
 class GameServer {
 private:
+    configManager config;
     int listenSocket;
     bool isRunning;
     gameLogic* logic;
