@@ -1,17 +1,19 @@
 #include "player.h"
+#include "contstants.h"
 
 
 //Constructor, Destructor
 player::player() {
-    this->x = 640.0f;      // Ustaw graczy na środku mapy
-    this->y = 360.0f;
-    this->speed = 5;       // Nadaj im jakąś początkową prędkość!
+    this->x = 552.0f;      // Ustaw graczy na środku mapy
+    this->y = 552.0f;
+    this->speed = PLAYER_SPEED;       // Nadaj im jakąś początkową prędkość!
     this->stamina = 100.0f;
     this->isConnected = false;
     this->isCaught = false;
     this->isSeeker = false;
     this->isRunning = false;
     this->isViewing = false;
+    this->viewingSpeedUP = false;
     this->abilityCooldown = 0.0f;
     direction = player::Direction::DOWN;
     playerstate = player::PlayerState::IDLE;
@@ -62,6 +64,9 @@ bool player::getIsRunning() const {
 bool player::getIsViewing() const {
     return this->isViewing;
 }
+bool player::getViewingSpeed() const {
+    return this->viewingSpeedUP;
+}
 player::ClientInput player::getClientInput() const {
     return this->input;
 }
@@ -107,6 +112,9 @@ void player::setIsRunning(bool newRunning) {
 }
 void player::setViewing(bool changedViewing) {
     this->isViewing = changedViewing;
+}
+void player::setViewingSpeed(bool changedViewingSpeed) {
+    this->viewingSpeedUP = changedViewingSpeed;
 }
 void player::setInput(ClientInput& newInput) {
     this->input = newInput;

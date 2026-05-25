@@ -16,6 +16,7 @@ gameLogic::gameLogic() {
     isStarted = false;
     stageStarted = false;
     timeForPlayers = LOBBY_TIME;
+    seekerIndex = -1;
 
     //random seed initialization
     std::random_device rd; 
@@ -28,51 +29,97 @@ float gameLogic::getTimeForPlayers() const {
     return this->timeForPlayers;
 }
 
-void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
+void gameLogic::staminaHandler(player& currentPlayer,float deltaTime) {
+
 
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float stamina = currentPlayer.getStamina();
+    float abilityCooldown = currentPlayer.getAbilityCooldown();
+    bool isSeeker = currentPlayer.getIsSeeker();
     float currentSpeed = currentPlayer.getSpeed();
+    float currentStamina;
+
+    if(abilityCooldown > 0) {
+        currentPlayer.setAbilityCooldown(abilityCooldown - deltaTime);
+        std::cout << "ABILITYCOOLDOWN: " << abilityCooldown <<std::endl;
+
+        if(currentPlayer.getViewingSpeed()) {
+            currentPlayer.setSpeed(currentSpeed * 1.4);
+            currentPlayer.setViewingSpeed(false);
+        }
+
+        if(stamina < MAX_STAMINA) {
+            currentStamina = stamina + (REGEN_RATE * deltaTime);
+            currentPlayer.setStamina(currentStamina);
+            return;
+        }
+        else {
+            currentPlayer.setStamina(MAX_STAMINA); // Clamp to max capacity
+            return;
+        }
+
+        return;
+    }
+    else {
+        currentPlayer.setAbilityCooldown(0.0f);
+    }
 
     //Sprint handling
     if(currentPlayerInput.shift) {
         if(stamina > 0.0f) {
-            float currentStamina = stamina - (DRAIN_RATE * deltaTime);
+            currentStamina = stamina - (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
-            if(currentPlayer.getIsSeeker() && !currentPlayer.getIsRunning()) {
-                currentPlayer.setSpeed(currentSpeed * 1.5);
-                currentPlayer.setIsRunning(true);
-            }
-            else if(!currentPlayer.getIsSeeker() && !currentPlayer.getIsViewing()) {
+
+            if(!isSeeker) {
                 currentPlayer.setViewing(true);
+                if(!currentPlayer.getViewingSpeed()) {
+                    currentPlayer.setSpeed(currentSpeed / 1.4);
+                    currentPlayer.setViewingSpeed(true);
+                }
+            }
+            else {
+                if(!currentPlayer.getIsRunning()) {
+                    currentPlayer.setSpeed(currentSpeed * 1.5);
+                    currentPlayer.setIsRunning(true);
+                }
             }
             return;
         }
         //Stamina depleted while trying to sprint
         else {
-            if(currentPlayer.getIsSeeker() && currentPlayer.getIsRunning()) {
+            currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
+            if(isSeeker && currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed / 1.5);
-                if(stamina < 0.0f) currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
                 currentPlayer.setIsRunning(false);
             }
-            else if(!currentPlayer.getIsSeeker() && currentPlayer.getIsViewing()) {
+            else if(!isSeeker){
+                currentPlayer.setAbilityCooldown(ABILITY_COOLDOWN);
                 currentPlayer.setViewing(false);
+                if(currentPlayer.getViewingSpeed()) {
+                    currentPlayer.setSpeed(currentSpeed * 1.4);
+                    currentPlayer.setViewingSpeed(false);
+                }
             }
             return;
         }
     }
     // Handle Walking
     else {
-        if(!currentPlayerInput.shift && currentPlayer.getIsRunning()) {
+        if(currentPlayer.getIsRunning()) {
             currentPlayer.setSpeed(currentSpeed / 1.5);
             currentPlayer.setIsRunning(false);
-            currentPlayer.setViewing(false);
         }
-        if(!currentPlayerInput.shift && currentPlayer.getIsViewing()) {
+        if(currentPlayer.getIsViewing()) {
+            currentPlayer.setAbilityCooldown(ABILITY_COOLDOWN);
             currentPlayer.setViewing(false);
+            if(currentPlayer.getViewingSpeed()) {
+                currentPlayer.setSpeed(currentSpeed * 1.4);
+                currentPlayer.setViewingSpeed(false);
+            }
         }
+
         if(stamina < MAX_STAMINA) {
-            float currentStamina = stamina + (REGEN_RATE * deltaTime);
+            currentStamina = stamina + (REGEN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
             return;
         }
@@ -130,12 +177,12 @@ bool gameLogic::gameTick(player players[4], GameServer* server) {
     for(int i = 0; i < 4; i++) {
         if(!players[i].getIsConnected() || players[i].getPlayerState() == player::PlayerState::DEATH) continue;
         staminaHandler(players[i], deltaTime);
-        playerMove(players[i], players, server);
+        playerMove(players[i], players, server, deltaTime);
     }
     return false;
 }
 
-void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer* server) {
+void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer* server, float deltaTime) {
 
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float currentSpeed = currentPlayer.getSpeed();
@@ -161,7 +208,7 @@ void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer*
 
     if(directionY != 0) {
         player::Direction animationDir = directionY > 0.0f ? player::Direction::DOWN : player::Direction::UP;
-        float newY = currentPlayer.getY() + (adjustedSpeed * directionY);
+        float newY = currentPlayer.getY() + (adjustedSpeed * directionY * deltaTime);
         
         currentPlayer.setY(newY);
         currentPlayer.setDirection(animationDir);
@@ -171,7 +218,7 @@ void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer*
 
     if(directionX != 0) {
         player::Direction animationDir = directionX > 0.0f ? player::Direction::RIGHT : player::Direction::LEFT;
-        float newX = currentPlayer.getX() + (adjustedSpeed * directionX);
+        float newX = currentPlayer.getX() + (adjustedSpeed * directionX * deltaTime);
         
         currentPlayer.setX(newX);
         currentPlayer.setDirection(animationDir);
@@ -182,14 +229,15 @@ void gameLogic::playerMove(player& currentPlayer, player players[4], GameServer*
 
 void gameLogic::collision(player& currentPlayer, player players[4], player::Direction directionFlag, GameServer* server) {
 
-    float currentX = currentPlayer.getX(), currentY = currentPlayer.getY();
+    float playerLength = PLAYER_LENGTH - 10;
+    float currentX = currentPlayer.getX(), currentY = currentPlayer.getY() + 10;
 
     int playerPosOnGridXMin = (int)currentPlayer.getX()/ TILE_SIZE;
-    int playerPosOnGridYMin = (int)currentPlayer.getY()/ TILE_SIZE;
+    int playerPosOnGridYMin = ((int)currentPlayer.getY() + 10)/ TILE_SIZE;
     int playerPosOnGridXMax = ((int)currentPlayer.getX() + PLAYER_WIDTH) / TILE_SIZE;
     int playerPosOnGridYMax = ((int)currentPlayer.getY() + PLAYER_LENGTH) / TILE_SIZE;
 
-    if(currentX < 0 || currentY < 0 || currentX + PLAYER_WIDTH >= MAP_WIDTH * TILE_SIZE || currentY + PLAYER_LENGTH >= MAP_HEIGHT * TILE_SIZE) {
+    if(currentX < 0 || currentY < 0 || currentX + PLAYER_WIDTH >= MAP_WIDTH * TILE_SIZE || currentY + playerLength >= MAP_HEIGHT * TILE_SIZE) {
         currentPlayer.setPlayerState(player::PlayerState::DEATH);
         return;
     }
@@ -199,8 +247,8 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
         int otherY = directionFlag == player::Direction::UP ? playerPosOnGridYMin : playerPosOnGridYMax;
         float otherX = -1.0f;
 
-        if(!isWakable(tileMap(otherY, playerPosOnGridXMin))) otherX = (float)playerPosOnGridXMin * TILE_SIZE;
-        else if(!isWakable(tileMap(otherY, playerPosOnGridXMax))) otherX = (float)playerPosOnGridXMax * TILE_SIZE;
+        if(!isWalkable(tileMap(otherY, playerPosOnGridXMin))) otherX = (float)playerPosOnGridXMin * TILE_SIZE;
+        else if(!isWalkable(tileMap(otherY, playerPosOnGridXMax))) otherX = (float)playerPosOnGridXMax * TILE_SIZE;
 
         if(otherX != -1.0f) aabbAlgorithm(currentPlayer, currentX, currentY, otherX, (float)(otherY * TILE_SIZE), directionFlag, true);
     }
@@ -210,8 +258,8 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
         int otherX = directionFlag == player::Direction::LEFT ? playerPosOnGridXMin : playerPosOnGridXMax;
         float otherY = -1.0f;
 
-        if(!isWakable(tileMap(playerPosOnGridYMin, otherX))) otherY = (float)playerPosOnGridYMin * TILE_SIZE;
-        else if(!isWakable(tileMap(playerPosOnGridYMax, otherX))) otherY = (float)playerPosOnGridYMax * TILE_SIZE;
+        if(!isWalkable(tileMap(playerPosOnGridYMin, otherX))) otherY = (float)playerPosOnGridYMin * TILE_SIZE;
+        else if(!isWalkable(tileMap(playerPosOnGridYMax, otherX))) otherY = (float)playerPosOnGridYMax * TILE_SIZE;
 
         if(otherY != -1.0f) aabbAlgorithm(currentPlayer, currentX, currentY, (float)(otherX * TILE_SIZE), otherY, directionFlag, true);
     }
@@ -221,7 +269,7 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
         if(&currentPlayer == &players[i]) continue;
         if(players[i].getPlayerState() == player::PlayerState::DEATH) continue;
 
-        float otherX = players[i].getX(), otherY = players[i].getY();
+        float otherX = players[i].getX(), otherY = players[i].getY() + 10;
 
         bool isColliding = aabbAlgorithm(currentPlayer, currentX, currentY, otherX, otherY, directionFlag, false);
         if (!isColliding) continue;
@@ -242,6 +290,7 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     float diffrence = 0.0f;
     float width;
     float length;
+    float playerLength = PLAYER_LENGTH - 10;
 
     if(isTileMap) {
         width = (float)TILE_SIZE;
@@ -249,14 +298,14 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     }
     else {
         width = (float)PLAYER_WIDTH;
-        length = (float)PLAYER_LENGTH;
+        length = (float)playerLength;
     }
 
     //AABB algorithm calculations
     if ((currentX) > (otherX + width)) return false;
     if ((currentX + PLAYER_WIDTH) < (otherX)) return false;
     if ((currentY) > (otherY + length)) return false;
-    if ((currentY + PLAYER_LENGTH) < (otherY)) return false;
+    if ((currentY + playerLength) < (otherY)) return false;
 
     //Adjusting current player position based on AABB algorithm calculations
     switch (directionFlag)
@@ -267,7 +316,7 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
         break;
         
     case player::Direction::DOWN:
-        diffrence = (currentY + PLAYER_LENGTH) - (otherY) + 0.1f;
+        diffrence = (currentY + playerLength) - (otherY) + 0.1f;
         currentPlayer.setY(currentPlayer.getY() - diffrence);
         break;
 
@@ -287,7 +336,6 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     return true;
 }
 
-//game state manager method TODO (optimalization)
 float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
 
     auto currentTime = std::chrono::steady_clock::now();
@@ -313,6 +361,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             std::uniform_int_distribution<> distrib(0, count - 1);
             seekerIndex = possibleSeekers[distrib(gen)];
             players[seekerIndex].setIsSeeker(true);
+            players[seekerIndex].setSpeed(SEEKER_SPEED);
         }
     }
 
@@ -332,11 +381,11 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
                 break;
             }
 
-            if(connectedPlayers < 2) {
+            /*if(connectedPlayers < 2) {
                 server->setIsRunning(false);
                 break;
             }
-
+            */
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
 
@@ -411,7 +460,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     return frameDelta.count();
 }
 
-bool gameLogic::isWakable(int tileId) {
+bool gameLogic::isWalkable(int tileId) {
     switch(tileId) {
         case 21: case 25: case 50: case 52:
         case 30: case 86: case 114:
