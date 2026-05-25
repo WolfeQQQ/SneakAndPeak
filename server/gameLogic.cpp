@@ -16,6 +16,7 @@ gameLogic::gameLogic() {
     isStarted = false;
     stageStarted = false;
     timeForPlayers = LOBBY_TIME;
+    seekerIndex = -1;
 
     //random seed initialization
     std::random_device rd; 
@@ -28,51 +29,97 @@ float gameLogic::getTimeForPlayers() const {
     return this->timeForPlayers;
 }
 
-void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
+void gameLogic::staminaHandler(player& currentPlayer,float deltaTime) {
+
 
     player::ClientInput currentPlayerInput = currentPlayer.getClientInput();
     float stamina = currentPlayer.getStamina();
+    float abilityCooldown = currentPlayer.getAbilityCooldown();
+    bool isSeeker = currentPlayer.getIsSeeker();
     float currentSpeed = currentPlayer.getSpeed();
+    float currentStamina;
+
+    if(abilityCooldown > 0) {
+        currentPlayer.setAbilityCooldown(abilityCooldown - deltaTime);
+        std::cout << "ABILITYCOOLDOWN: " << abilityCooldown <<std::endl;
+
+        if(currentPlayer.getViewingSpeed()) {
+            currentPlayer.setSpeed(currentSpeed * 1.4);
+            currentPlayer.setViewingSpeed(false);
+        }
+
+        if(stamina < MAX_STAMINA) {
+            currentStamina = stamina + (REGEN_RATE * deltaTime);
+            currentPlayer.setStamina(currentStamina);
+            return;
+        }
+        else {
+            currentPlayer.setStamina(MAX_STAMINA); // Clamp to max capacity
+            return;
+        }
+
+        return;
+    }
+    else {
+        currentPlayer.setAbilityCooldown(0.0f);
+    }
 
     //Sprint handling
     if(currentPlayerInput.shift) {
         if(stamina > 0.0f) {
-            float currentStamina = stamina - (DRAIN_RATE * deltaTime);
+            currentStamina = stamina - (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
-            if(currentPlayer.getIsSeeker() && !currentPlayer.getIsRunning()) {
-                currentPlayer.setSpeed(currentSpeed * 1.5);
-                currentPlayer.setIsRunning(true);
-            }
-            else if(!currentPlayer.getIsSeeker() && !currentPlayer.getIsViewing()) {
+
+            if(!isSeeker) {
                 currentPlayer.setViewing(true);
+                if(!currentPlayer.getViewingSpeed()) {
+                    currentPlayer.setSpeed(currentSpeed / 1.4);
+                    currentPlayer.setViewingSpeed(true);
+                }
+            }
+            else {
+                if(!currentPlayer.getIsRunning()) {
+                    currentPlayer.setSpeed(currentSpeed * 1.5);
+                    currentPlayer.setIsRunning(true);
+                }
             }
             return;
         }
         //Stamina depleted while trying to sprint
         else {
-            if(currentPlayer.getIsSeeker() && currentPlayer.getIsRunning()) {
+            currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
+            if(isSeeker && currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed / 1.5);
-                if(stamina < 0.0f) currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
                 currentPlayer.setIsRunning(false);
             }
-            else if(!currentPlayer.getIsSeeker() && currentPlayer.getIsViewing()) {
+            else if(!isSeeker){
+                currentPlayer.setAbilityCooldown(ABILITY_COOLDOWN);
                 currentPlayer.setViewing(false);
+                if(currentPlayer.getViewingSpeed()) {
+                    currentPlayer.setSpeed(currentSpeed * 1.4);
+                    currentPlayer.setViewingSpeed(false);
+                }
             }
             return;
         }
     }
     // Handle Walking
     else {
-        if(!currentPlayerInput.shift && currentPlayer.getIsRunning()) {
+        if(currentPlayer.getIsRunning()) {
             currentPlayer.setSpeed(currentSpeed / 1.5);
             currentPlayer.setIsRunning(false);
-            currentPlayer.setViewing(false);
         }
-        if(!currentPlayerInput.shift && currentPlayer.getIsViewing()) {
+        if(currentPlayer.getIsViewing()) {
+            currentPlayer.setAbilityCooldown(ABILITY_COOLDOWN);
             currentPlayer.setViewing(false);
+            if(currentPlayer.getViewingSpeed()) {
+                currentPlayer.setSpeed(currentSpeed * 1.4);
+                currentPlayer.setViewingSpeed(false);
+            }
         }
+
         if(stamina < MAX_STAMINA) {
-            float currentStamina = stamina + (REGEN_RATE * deltaTime);
+            currentStamina = stamina + (REGEN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
             return;
         }
@@ -289,7 +336,6 @@ bool gameLogic::aabbAlgorithm(player& currentPlayer, float currentX, float curre
     return true;
 }
 
-//game state manager method TODO (optimalization)
 float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
 
     auto currentTime = std::chrono::steady_clock::now();
@@ -315,6 +361,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             std::uniform_int_distribution<> distrib(0, count - 1);
             seekerIndex = possibleSeekers[distrib(gen)];
             players[seekerIndex].setIsSeeker(true);
+            players[seekerIndex].setSpeed(SEEKER_SPEED);
         }
     }
 

@@ -13,6 +13,7 @@ player::player() {
     this->isSeeker = false;
     this->isRunning = false;
     this->isViewing = false;
+    this->viewingSpeedUP = false;
     this->abilityCooldown = 0.0f;
     direction = player::Direction::DOWN;
     playerstate = player::PlayerState::IDLE;
@@ -63,6 +64,9 @@ bool player::getIsRunning() const {
 bool player::getIsViewing() const {
     return this->isViewing;
 }
+bool player::getViewingSpeed() const {
+    return this->viewingSpeedUP;
+}
 player::ClientInput player::getClientInput() const {
     return this->input;
 }
@@ -108,6 +112,9 @@ void player::setIsRunning(bool newRunning) {
 }
 void player::setViewing(bool changedViewing) {
     this->isViewing = changedViewing;
+}
+void player::setViewingSpeed(bool changedViewingSpeed) {
+    this->viewingSpeedUP = changedViewingSpeed;
 }
 void player::setInput(ClientInput& newInput) {
     this->input = newInput;

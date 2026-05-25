@@ -120,5 +120,7 @@ private:
     bool loadMap();
 
     bool isWalkable(int tileId);
+
+    void runRadar(player currentPlyaer, player players[4]);
 };
 
