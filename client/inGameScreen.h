@@ -37,6 +37,10 @@ class InGameScreen : public Screen {
         Texture2D seekerWalkTexture;
         Texture2D seekerDeathTexture;
 
+        // Textures for the stamina bar UI element
+        Texture2D staminaBarTexture; 
+        Texture2D staminaFillTexture; 
+
         
         PlayerAnimation playerAnim[4];  // All players animation states
         Camera2D camera;    // Raylib camera used to track the player's location
