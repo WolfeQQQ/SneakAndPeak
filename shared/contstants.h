@@ -26,4 +26,34 @@
 #define GAME_TIME 180.0f
 #define GAME_OVER_TIME 15.0f
 
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
+#define SERVER_IP "127.0.0.1"
+
+#define VISION_RADIUS 300.0f
+#define VISION_SOFTNESS 150.0f
+
+#define MAP_CSV_PATH "assets/map_temp.csv"
+#define TILESET_PATH "assets/tilemap.png"
+
+#define PLAYER_IDLE_PATH "assets/player/blue/idle.png"
+#define PLAYER_WALK_PATH "assets/player/blue/walk.png"
+#define PLAYER_DEATH_PATH "assets/player/blue/death.png"
+
+#define SEEKER_IDLE_PATH "assets/player/red/idle.png"
+#define SEEKER_WALK_PATH "assets/player/red/walk.png"
+#define SEEKER_DEATH_PATH "assets/player/red/death.png"
+
+#define VISION_SHADER_PATH "assets/shaders/vision.fs"
+
+#define CAMERA_ZOOM 1.5f
+
+#define WALK_FRAMES 4
+#define DEATH_FRAMES 3
+#define IDLE_FRAMES 2
+
+#define ANIMATION_SPEED 0.2f
+
+#define PLAYER_FRAME_SIZE 32.0f
+
 #endif
