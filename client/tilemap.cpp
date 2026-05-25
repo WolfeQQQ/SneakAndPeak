@@ -108,5 +108,20 @@ bool Tilemap::isSolid(float x, float y){
     if (tileY < 0 || tileY >= mapData.size()) return true;
     if (tileX < 0 || tileX >= mapData[tileY].size()) return true;
 
-    return mapData[tileY][tileX] != -1; // For now, only 'id = -1' is considered a non-solid tile
+    return isWall(mapData[tileY][tileX]); // For now, only 'id = -1' is considered a non-solid tile
+}
+
+bool Tilemap::isWall(int tileId) {
+    switch(tileId) {
+        case 21: case 25: case 50: case 52:
+        case 30: case 86: case 114:
+        case 81: case 82: case 137: case 138:
+        case 109: case 110:
+        case 163: case 191:
+        case 230: case 372: case 373: case 374:
+            return false;
+            
+        default:
+            return true;
+    }
 }

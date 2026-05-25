@@ -11,7 +11,7 @@
 #define PHASE_2_DURATION_SEC 180.0f
 #define GHOST_TIMEOUT_SEC 15.0f
 
-#define MAP_WIDTH 40
+#define MAP_WIDTH 30
 #define MAP_HEIGHT 30
 #define TILE_SIZE 36
 
@@ -33,7 +33,7 @@
 #define VISION_RADIUS 300.0f
 #define VISION_SOFTNESS 150.0f
 
-#define MAP_CSV_PATH "assets/map_temp.csv"
+#define MAP_CSV_PATH "assets/Map.csv"
 #define TILESET_PATH "assets/tilemap.png"
 
 #define PLAYER_IDLE_PATH "assets/player/blue/idle.png"

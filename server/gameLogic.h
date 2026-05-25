@@ -118,4 +118,7 @@ private:
      * @return false if map was loaded succesfully.
      */
     bool loadMap();
+
+    bool isWakable(int tileId);
 };
+

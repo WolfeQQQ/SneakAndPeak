@@ -39,23 +39,23 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
         if(stamina > 0.0f) {
             float currentStamina = stamina - (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
-            if(currentPlayer.isSeeker() && !currentPlayer.getIsRunning()) {
+            if(currentPlayer.getIsSeeker() && !currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed * 1.5);
                 currentPlayer.setIsRunning(true);
             }
-            else if(!currentPlayer.isSeeker && !currentPlayer.getIsViewing()) {
+            else if(!currentPlayer.getIsSeeker() && !currentPlayer.getIsViewing()) {
                 currentPlayer.setViewing(true);
             }
             return;
         }
         //Stamina depleted while trying to sprint
         else {
-            if(currentPlayer.isSeeker() && currentPlayer.getIsRunning()) {
+            if(currentPlayer.getIsSeeker() && currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed / 1.5);
                 if(stamina < 0.0f) currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
                 currentPlayer.setIsRunning(false);
             }
-            else if(!currentPlayer.isSeeker && currentPlayer.getIsViewing()) {
+            else if(!currentPlayer.getIsSeeker() && currentPlayer.getIsViewing()) {
                 currentPlayer.setViewing(false);
             }
             return;
@@ -85,7 +85,7 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
 
 bool gameLogic::loadMap() {
 
-    std::ifstream plik("assets/map_temp.csv");
+    std::ifstream plik(MAP_CSV_PATH);
 
     if(!plik.is_open()) {
         std::cout << "CRITICAL ERROR! YO MAMA2FAT TO OPEN" << std::endl;
@@ -199,8 +199,8 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
         int otherY = directionFlag == player::Direction::UP ? playerPosOnGridYMin : playerPosOnGridYMax;
         float otherX = -1.0f;
 
-        if(tileMap(otherY, playerPosOnGridXMin) != -1) otherX = (float)playerPosOnGridXMin * TILE_SIZE;
-        else if(tileMap(otherY, playerPosOnGridXMax) != -1) otherX = (float)playerPosOnGridXMax * TILE_SIZE;
+        if(!isWakable(tileMap(otherY, playerPosOnGridXMin))) otherX = (float)playerPosOnGridXMin * TILE_SIZE;
+        else if(!isWakable(tileMap(otherY, playerPosOnGridXMax))) otherX = (float)playerPosOnGridXMax * TILE_SIZE;
 
         if(otherX != -1.0f) aabbAlgorithm(currentPlayer, currentX, currentY, otherX, (float)(otherY * TILE_SIZE), directionFlag, true);
     }
@@ -210,8 +210,8 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
         int otherX = directionFlag == player::Direction::LEFT ? playerPosOnGridXMin : playerPosOnGridXMax;
         float otherY = -1.0f;
 
-        if(tileMap(playerPosOnGridYMin, otherX) != -1) otherY = (float)playerPosOnGridYMin * TILE_SIZE;
-        else if(tileMap(playerPosOnGridYMax, otherX) != -1) otherY = (float)playerPosOnGridYMax * TILE_SIZE;
+        if(!isWakable(tileMap(playerPosOnGridYMin, otherX))) otherY = (float)playerPosOnGridYMin * TILE_SIZE;
+        else if(!isWakable(tileMap(playerPosOnGridYMax, otherX))) otherY = (float)playerPosOnGridYMax * TILE_SIZE;
 
         if(otherY != -1.0f) aabbAlgorithm(currentPlayer, currentX, currentY, (float)(otherX * TILE_SIZE), otherY, directionFlag, true);
     }
@@ -409,4 +409,19 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     std::chrono::duration<float> frameDelta = currentTime - lastTime;
     lastTime = currentTime;
     return frameDelta.count();
+}
+
+bool gameLogic::isWakable(int tileId) {
+    switch(tileId) {
+        case 21: case 25: case 50: case 52:
+        case 30: case 86: case 114:
+        case 81: case 82: case 137: case 138:
+        case 109: case 110:
+        case 163: case 191:
+        case 230: case 372: case 373: case 374:
+            return true;
+            
+        default:
+            return false;
+    }
 }
