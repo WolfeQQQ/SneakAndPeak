@@ -230,7 +230,7 @@ void InGameScreen::draw(){
             float scale = 2.0f;
             float drawSize = PLAYER_FRAME_SIZE * scale;
             float dX = players[i].getX() - (drawSize / 2) + PLAYER_WIDTH/2;
-            float dY = players[i].getY() - (drawSize / 2) + PLAYER_LENGTH/2;
+            float dY = (players[i].getY() + 1) - (drawSize / 2) + PLAYER_LENGTH/2;
             Rectangle dest = {dX, dY, drawSize, drawSize};
             DrawTexturePro(currentTexture, source, dest, (Vector2){0,0}, 0.0f, WHITE);
 

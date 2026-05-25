@@ -1,11 +1,12 @@
 #include "player.h"
+#include "contstants.h"
 
 
 //Constructor, Destructor
 player::player() {
-    this->x = 640.0f;      // Ustaw graczy na środku mapy
-    this->y = 360.0f;
-    this->speed = 5;       // Nadaj im jakąś początkową prędkość!
+    this->x = 552.0f;      // Ustaw graczy na środku mapy
+    this->y = 552.0f;
+    this->speed = PLAYER_SPEED;       // Nadaj im jakąś początkową prędkość!
     this->stamina = 100.0f;
     this->isConnected = false;
     this->isCaught = false;

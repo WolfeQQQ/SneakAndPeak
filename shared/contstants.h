@@ -20,6 +20,7 @@
 #define DRAIN_RATE 50.0f
 #define REGEN_RATE 20.0f
 #define MAX_STAMINA 100.0f
+#define PLAYER_SPEED 144.0f
 
 #define LOBBY_TIME 30.0f
 #define COUNTDOWN_TIME 15.0f
