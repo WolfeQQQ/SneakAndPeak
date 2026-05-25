@@ -30,6 +30,7 @@ public:
         bool left;
         bool shift;
         //bool eKey;
+        bool backToLobby;
     };
 
     //Getters

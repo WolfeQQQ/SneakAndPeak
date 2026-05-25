@@ -50,6 +50,7 @@ private:
     std::chrono::steady_clock::time_point lastTime;
     float globalTime;
     float timeForPlayers;
+    float radarTimer;
     bool isStarted;
     bool stageStarted;
     Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> tileMap;

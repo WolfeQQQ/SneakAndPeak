@@ -17,6 +17,11 @@ GameServer::GameServer(){
     std::memset(clientSockets, 0, sizeof(clientSockets));
     std::memset(clientInputs, 0, sizeof(clientInputs));
     logic = new gameLogic();
+
+    auto now = std::chrono::steady_clock::now();
+    for(int i = 0; i < MAX_CLIENTS; i++){
+        lastInputTime[i] = now;
+    }
 }
 
 //Destructor
@@ -24,10 +29,12 @@ GameServer::~GameServer() {Stop(); delete logic;}
 
 //The main method that creates a socket and handles loops for accepting new clients
 void GameServer::Start(){
+    config.loadConfig("serverConfig.txt");
+    
     listenSocket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
+    serverAddr.sin_port = htons(config.getPort());
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
@@ -60,8 +67,6 @@ void GameServer::HandleNewConnection(int clientSock){
         if(players[i].getIsConnected()!=true){
             assignedId = i;
             clientSockets[i] = clientSock;
-            players[i].setIsConnected(true);
-            players[i].setId(i);
 
 
             players[i].setIsConnected(true);
@@ -96,9 +101,23 @@ void GameServer::ClientListener(int playerId, int sock){
     player::ClientInput tempinput;
     int readSize;
 
+    player::ClientInput localInputCache;
+    std::memset(&localInputCache, 0, sizeof(player::ClientInput));
+    bool hasNewDataToCommit = false;
+
     while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), MSG_WAITALL)) > 0){
-         std::lock_guard<std::mutex> lock(stateMutex);
-         clientInputs[playerId] = tempinput;
+        auto now = std::chrono::steady_clock::now();
+        auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastInputTime[playerId]).count();
+
+        localInputCache = tempinput;
+        hasNewDataToCommit = true;
+
+        if(elapsedMs > 10){
+            lastInputTime[playerId] = now;
+            std::lock_guard<std::mutex> lock(stateMutex);
+            clientInputs[playerId] = tempinput;
+            hasNewDataToCommit = false;
+        }
     }
 
     {
@@ -122,6 +141,7 @@ void GameServer::resetPlayer(int playerId) {
     players[playerId].setStamina(100.0f);
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
+    lastInputTime[playerId] = std::chrono::steady_clock::now();
 }
 
 void GameServer::GameUpdateLoop() {
@@ -136,14 +156,52 @@ void GameServer::GameUpdateLoop() {
                 }
             }
 
+            if(currentState == GameState::GAME_OVER){
+                int connectedPlayers = 0;
+                bool voteBackToLobby = false;
+
+                for(int i = 0 ; i < MAX_CLIENTS; i++){
+                    if(players[i].getIsConnected()){
+                        connectedPlayers ++;
+                        if(clientInputs[i].backToLobby){
+                            voteBackToLobby = true;
+                        }
+                    }
+
+                }
+
+                if(connectedPlayers == 0){
+                    std::cout << "closing server all players left\n";
+                    Stop();
+                    break;
+                }
+
+                if(voteBackToLobby){
+                    std::cout << " game reset\n";
+                    currentState = GameState::LOBBY;
+
+                    for (int i = 0; i < MAX_CLIENTS; i++) {
+                        if (players[i].getIsConnected()) {
+                            resetPlayer(i);
+                            players[i].setIsConnected(true);
+                        }
+                    }
+                }
+            }
+            
+
+            if(isRunning){
             bool toStop = logic->gameTick(players, this);
             if(toStop) Stop();
+            }
         }
 
-        StateToUpload();
+        if (isRunning) {
+            StateToUpload();
+        }
         auto endTime = std::chrono::steady_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::this_thread::sleep_for(std::chrono::milliseconds(TICK_DELAY_MS) - frameDuration);
+        std::this_thread::sleep_for(std::chrono::milliseconds(config.getTickDelay()) - frameDuration);
     }
 }
 
