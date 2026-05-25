@@ -138,6 +138,7 @@ void GameServer::resetPlayer(int playerId) {
     players[playerId].setIsRunning(false);
     players[playerId].setX(529.0f);
     players[playerId].setY(529.0f);
+    players[playerId].setSpeed(144.0f);
     players[playerId].setStamina(100.0f);
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
