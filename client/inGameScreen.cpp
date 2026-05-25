@@ -2,6 +2,10 @@
 #include <cmath>
 #include <vector>
 
+#define UI_STAMINA_BAR_PATH "assets/ui/StaminaBar.png"
+#define UI_STAMINA_FILL_PATH "assets/ui/StaminaBarFill.png"
+
+
 // Constructor of a main game screen, initializes textures, tilemaps, shaders etc.
 InGameScreen::InGameScreen(Network* networkClient, int playerId) {
 
@@ -23,6 +27,9 @@ InGameScreen::InGameScreen(Network* networkClient, int playerId) {
     seekerIdleTexture = LoadTexture(SEEKER_IDLE_PATH);
     seekerWalkTexture = LoadTexture(SEEKER_WALK_PATH);
     seekerDeathTexture = LoadTexture(SEEKER_DEATH_PATH);
+
+    staminaBarTexture = LoadTexture(UI_STAMINA_BAR_PATH);
+    staminaFillTexture = LoadTexture(UI_STAMINA_FILL_PATH);
 
     // Load the tilemap from the CSV file and the tileset texture
     tilemap.load(MAP_CSV_PATH, TILESET_PATH, TILE_SIZE); 
@@ -52,6 +59,8 @@ InGameScreen::~InGameScreen() {
     UnloadTexture(seekerIdleTexture);
     UnloadTexture(seekerWalkTexture);
     UnloadTexture(seekerDeathTexture);
+    UnloadTexture(staminaBarTexture);
+    UnloadTexture(staminaFillTexture);
     tilemap.unload();
     UnloadRenderTexture(canvas);
     UnloadRenderTexture(lightMask);
@@ -138,8 +147,7 @@ void InGameScreen::draw(){
 
         BeginMode2D(camera);
             Vector2 center = {myPlayer.getX() + PLAYER_WIDTH/2, myPlayer.getY() + PLAYER_LENGTH/2};
-            float radius = VISION_RADIUS;   // Radius of the player's vision, used for raycasting
-
+          
             std::vector<Vector2> points;    // Actual raycasted points
 
             // Cast Rays in a full circle around the player
@@ -151,11 +159,13 @@ void InGameScreen::draw(){
                 Vector2 hit = center; // Initialize the hit point to the center of the player
 
                 // Cast a ray in the current direction until it hits a wall or go beyond the vision radius
-                for (float j = 0; j < radius; j += 5.0f) {
+                for (float j = 0; j < VISION_RADIUS; j += 1.0f) {
                     hit.x = center.x + x * j;
                     hit.y = center.y + y * j;
 
                     if(tilemap.isSolid(hit.x, hit.y)){
+                        hit.x += x ; // Move the hit point slightly into the wall
+                        hit.y += y ;
                         break;
                     }
                 }
@@ -169,10 +179,7 @@ void InGameScreen::draw(){
             }
             DrawTriangle(center, points[0], points.back(), WHITE);
 
-            // Better visual effect :)
-            for(size_t i = 0; i < points.size(); i++){
-                DrawCircleGradient(points[i], 25.0f, WHITE, (Color){255, 255, 255, 0});
-            }
+            
 
         EndMode2D();
     EndTextureMode();
@@ -265,6 +272,18 @@ void InGameScreen::draw(){
     EndBlendMode();
 
     // Draw the UI elements such as stamina bar and game timer
+
+    // Vector2 staminaPos = {10, 40}; // Position of the stamina bar
+    
+    // float staminaFill = myPlayer.getStamina() / 100.0f; // Calculate the fill based on the player's stamina
+    // if (staminaFill < 0) staminaFill = 0; 
+    // float fillWidth = staminaFill * staminaFillTexture.width;
+    // Rectangle source = {0.0f, 0.0f, fillWidth, staminaFillTexture.height};
+    // Vector2 fillPos = {staminaPos.x+23, staminaPos.y+15};
+    // DrawTextureRec(staminaFillTexture, source, fillPos, WHITE); // Draw the stamina fill
+    
+    // DrawTexture(staminaBarTexture, staminaPos.x, staminaPos.y, WHITE); // Draw the stamina bar background
+
     DrawText("Stamina: ", 10, 10, 20,WHITE);
     DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
     DrawRectangleLines(10,40, 200, 20, WHITE);

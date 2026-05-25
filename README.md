@@ -59,10 +59,10 @@ placeholder for some gif
 
 ### 1. Compile
 ```bash
-# Builds both server and client | Buduje serwer i klienta
+# Builds both server and client
 make 
 
-# Or build separately | Albo buduj osobno
+# Or build separately
 make server
 make client
 ```
