@@ -39,23 +39,23 @@ void gameLogic::staminaHandler(player& currentPlayer, float deltaTime) {
         if(stamina > 0.0f) {
             float currentStamina = stamina - (DRAIN_RATE * deltaTime);
             currentPlayer.setStamina(currentStamina);
-            if(currentPlayer.isSeeker() && !currentPlayer.getIsRunning()) {
+            if(currentPlayer.getIsSeeker() && !currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed * 1.5);
                 currentPlayer.setIsRunning(true);
             }
-            else if(!currentPlayer.isSeeker && !currentPlayer.getIsViewing()) {
+            else if(!currentPlayer.getIsSeeker() && !currentPlayer.getIsViewing()) {
                 currentPlayer.setViewing(true);
             }
             return;
         }
         //Stamina depleted while trying to sprint
         else {
-            if(currentPlayer.isSeeker() && currentPlayer.getIsRunning()) {
+            if(currentPlayer.getIsSeeker() && currentPlayer.getIsRunning()) {
                 currentPlayer.setSpeed(currentSpeed / 1.5);
                 if(stamina < 0.0f) currentPlayer.setStamina(0.0f); // Clamp to prevent negative stamina
                 currentPlayer.setIsRunning(false);
             }
-            else if(!currentPlayer.isSeeker && currentPlayer.getIsViewing()) {
+            else if(!currentPlayer.getIsSeeker() && currentPlayer.getIsViewing()) {
                 currentPlayer.setViewing(false);
             }
             return;
@@ -409,4 +409,53 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     std::chrono::duration<float> frameDelta = currentTime - lastTime;
     lastTime = currentTime;
     return frameDelta.count();
+}
+
+void gameLogic::runRadar(player players[4], float deltaTime){
+    radarTimer += deltaTime;
+
+    if(radarTimer >= 5.0f){
+        radarTimer = 0.0f;
+
+        int seekerId = -1;
+
+        for(int i = 0; i < 4; i++){
+            if(players[i].getIsConnected() && players[i].getIsSeeker()){
+                seekerId = i;
+                break;
+            }
+        }
+
+        if(seekerId > -1){
+            float seekerX = players[seekerId].getX();
+            float seekerY = players[seekerId].getY();
+
+            int choosenHider = -1;
+            float curr_dist = 999999.0f;
+
+            for(int i = 0; i < 4 ; i++){
+                if(i = seekerId || !players[i].getIsConnected() || players[i].getPlayerState() == player::PlayerState::DEATH){
+                    continue;
+                }
+
+                float hidderX = players[i].getX();
+                float hidderY = players[i].getY();
+
+                float difX = seekerX - hidderX;
+                float difY = seekerY - hidderY;
+
+                float dist = std::sqrt(difX * difX + difY * difY);
+
+                if(dist < curr_dist){
+                    curr_dist = dist;
+                    choosenHider = i;
+                }
+            }
+
+            if(choosenHider != -1){
+                std::cout << "X: " << players[choosenHider].getX();
+                std::cout << "Y: " << players[choosenHider].getY();
+            }
+        }
+    }
 }
