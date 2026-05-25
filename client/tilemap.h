@@ -44,4 +44,6 @@ class Tilemap {
          */
         bool isSolid(float x, float y);
 
+        bool isWall(int tileId);
+
 };

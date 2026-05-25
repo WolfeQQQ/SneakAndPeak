@@ -43,6 +43,7 @@ public:
     bool getIsSeeker() const;
     bool getIsConnected() const;
     bool getIsRunning() const;
+    bool getIsViewing() const;
     ClientInput getClientInput() const;
     Direction getDirection() const;
     PlayerState getPlayerState() const;
@@ -57,6 +58,7 @@ public:
     void setIsSeeker(bool changedSeeker);
     void setIsConnected(bool changedConnectec);
     void setIsRunning(bool changedRunning);
+    void setViewing(bool changedViewing);
     void setId(int newId);
     void setInput(ClientInput& newInput);
     void setDirection(Direction newDirection);
@@ -74,6 +76,7 @@ private:
     bool isSeeker;
     bool isConnected;
     bool isRunning;
+    bool isViewing;
     float abilityCooldown;
 
     //Client Input
