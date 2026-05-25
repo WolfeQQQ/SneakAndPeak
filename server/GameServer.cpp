@@ -1,5 +1,6 @@
 #include "GameServer.h"
 #include "gameLogic.h"
+#include "contstants.h"
 #include <iostream>
 #include <cstring>
 #include <chrono>
@@ -70,9 +71,9 @@ void GameServer::HandleNewConnection(int clientSock){
 
             players[i].setIsConnected(true);
             players[i].setId(i);
-            players[i].setX(500.0f); 
-            players[i].setY(400.0f);
-            players[i].setSpeed(4.0f);
+            players[i].setX(529.0f); 
+            players[i].setY(529.0f);
+            players[i].setSpeed(PLAYER_SPEED);
             players[i].setStamina(100.0f);
             players[i].setIsCaught(false);
             players[i].setIsSeeker(false);
@@ -135,8 +136,8 @@ void GameServer::resetPlayer(int playerId) {
     players[playerId].setIsSeeker(false);
     players[playerId].setIsCaught(false);
     players[playerId].setIsRunning(false);
-    players[playerId].setX(500.0f);
-    players[playerId].setY(400.0f);
+    players[playerId].setX(529.0f);
+    players[playerId].setY(529.0f);
     players[playerId].setStamina(100.0f);
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
@@ -211,7 +212,6 @@ void GameServer::StateToUpload(){
     GameStatePacket packet;
     packet.stage = currentState;
     packet.timer = logic->getTimeForPlayers();
-    std::cout << logic->getTimeForPlayers() << std::endl;
     std::memcpy(packet.players, players, sizeof(players));
 
     for(int i = 0; i < MAX_CLIENTS; i++){

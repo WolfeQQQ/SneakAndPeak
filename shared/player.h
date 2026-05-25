@@ -45,6 +45,7 @@ public:
     bool getIsConnected() const;
     bool getIsRunning() const;
     bool getIsViewing() const;
+    bool getViewingSpeed() const;
     ClientInput getClientInput() const;
     Direction getDirection() const;
     PlayerState getPlayerState() const;
@@ -60,6 +61,7 @@ public:
     void setIsConnected(bool changedConnectec);
     void setIsRunning(bool changedRunning);
     void setViewing(bool changedViewing);
+    void setViewingSpeed(bool changedViewingSpeed);
     void setId(int newId);
     void setInput(ClientInput& newInput);
     void setDirection(Direction newDirection);
@@ -78,6 +80,7 @@ private:
     bool isConnected;
     bool isRunning;
     bool isViewing;
+    bool viewingSpeedUP;
     float abilityCooldown;
 
     //Client Input

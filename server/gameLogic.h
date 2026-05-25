@@ -66,7 +66,7 @@ private:
      * @param players Array of all players (needed for collision checks).
      * @param server Pointer to the GameServer to check current game stage.
      */
-    void playerMove(player& currentPlayer, player players[4], GameServer* server);
+    void playerMove(player& currentPlayer, player players[4], GameServer* server, float deltaTime);
 
     /**
      * @brief Checks and resolves collisions between the player, map boundaries, tilemap, and other players.
@@ -120,5 +120,8 @@ private:
      */
     bool loadMap();
 
-    void runRadar(player players[4], float deltaTime);
+    bool isWalkable(int tileId);
+
+    void runRadar(player currentPlyaer, player players[4]);
 };
+
