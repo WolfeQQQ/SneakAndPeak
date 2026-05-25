@@ -98,18 +98,22 @@ void GameServer::ClientListener(int playerId, int sock){
     player::ClientInput tempinput;
     int readSize;
 
+    player::ClientInput localInputCache;
+    std::memset(&localInputCache, 0, sizeof(player::ClientInput));
+    bool hasNewDataToCommit = false;
+
     while((readSize = recv(sock, &tempinput, sizeof(player::ClientInput), MSG_WAITALL)) > 0){
         auto now = std::chrono::steady_clock::now();
         auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastInputTime[playerId]).count();
 
+        localInputCache = tempinput;
+        hasNewDataToCommit = true;
 
         if(elapsedMs > 10){
             lastInputTime[playerId] = now;
             std::lock_guard<std::mutex> lock(stateMutex);
             clientInputs[playerId] = tempinput;
-        }
-        else{
-            clientInputs[playerId] = tempinput;
+            hasNewDataToCommit = false;
         }
     }
 
