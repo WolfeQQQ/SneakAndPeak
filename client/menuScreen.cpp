@@ -76,10 +76,10 @@ AppState MenuScreen::update(){
 
     // Input Handling
     if (IsKeyPressed(KEY_DOWN)){
-        selectedOption = (selectedOption + 1) % optionsCount;
+        selectedOption = (selectedOption - 1 < 0) ? optionsCount - 1 : selectedOption - 1;
     }
     if(IsKeyPressed(KEY_UP)){
-        selectedOption = (selectedOption - 1 < 0) ? optionsCount - 1 : selectedOption - 1;
+        selectedOption = (selectedOption + 1) % optionsCount;
     }
 
     if (IsKeyPressed(KEY_ENTER)){
@@ -89,6 +89,9 @@ AppState MenuScreen::update(){
                 break;
             case 1:   
                 return AppState::EXIT;      
+                break;
+            case 2: 
+                //
                 break;
         }
     }
@@ -116,7 +119,7 @@ AppState MenuScreen::update(){
         currentWaypoint = (currentWaypoint + 1) % waypoints.size();
     }
     else{
-        float speed = 144.0f;
+        float speed = 72.0f;
         float dirX = dx / distance;
         float dirY = dy / distance;
 
@@ -235,14 +238,18 @@ void MenuScreen::draw(){
     // Colors for the currently selected and non-selected options
     Color startColor = (selectedOption == 0) ? LIGHTGRAY : DARKGRAY; 
     Color exitColor = (selectedOption == 1) ? LIGHTGRAY : DARKGRAY; 
+    Color settingsColor = (selectedOption == 2) ? LIGHTGRAY : DARKGRAY;
     
-    DrawText("SNEAK&PEAK", 100, SCREEN_HEIGHT / 2 - 200, 100, WHITE); // TODO - center text properly
+    DrawText("SNEAK&PEAK", 100, SCREEN_HEIGHT / 2 - 300, 100, WHITE); // TODO - center text properly
     
-    DrawRectangle(100, 300, 200, 50, startColor); 
-    DrawText("Start Game", 100, 310, 20, BLACK);   // TODO -  Buttons too...
+    DrawRectangle(100, 200, 300, 75, startColor); 
+    DrawText("Start Game", 110, 220, 30, BLACK);   // TODO -  Buttons too...
     
-    DrawRectangle(100, 400, 200, 50, exitColor);
-    DrawText("Exit", 100, 410, 20, BLACK);
+    DrawRectangle(100, 320, 300, 75, settingsColor);
+    DrawText("Settings", 110, 340, 30, BLACK);
+
+    DrawRectangle(100, 440, 300, 75, exitColor);
+    DrawText("Exit", 110, 460, 30, BLACK);
 
     //TODO COORDINATES AND SIZE ADJUSTMENTS
 }

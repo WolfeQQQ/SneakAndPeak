@@ -18,7 +18,7 @@ struct MenuAnimation{
  */
 class MenuScreen : public Screen {
     private: 
-        int optionsCount = 2; // Number of menu options
+        int optionsCount = 3; // Number of menu options
         int selectedOption = 0; // Variable to track the currently selected menu option
 
         Texture2D hiderWalkTexture; // Texture for the hider's walking animation in the menu
