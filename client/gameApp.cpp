@@ -2,6 +2,7 @@
 #include "menuScreen.h"
 #include "inGameScreen.h"
 #include "../shared/contstants.h"
+#include "gameOverScreen.h"
 // #include more_screens
 #include "raylib.h"
 
@@ -83,7 +84,7 @@ void GameApp::changeState(AppState newState){
             // currentScreen = std::make_unique<DisconnectedScreen>();
             break;
         case AppState::GAME_OVER:
-            // currentScreen = std::make_unique<GameOverScreen>();
+             currentScreen = std::make_unique<GameOverScreen>();
             break;
         
     }
