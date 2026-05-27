@@ -114,11 +114,12 @@ bool Tilemap::isSolid(float x, float y){
 bool Tilemap::isWall(int tileId) {
     switch(tileId) {
         case 21: case 25: case 50: case 52:
-        case 30: case 86: case 114:
+        case 30: case 86: case 114: case 58:
         case 81: case 82: case 137: case 138:
         case 109: case 110:
         case 163: case 191:
         case 230: case 372: case 373: case 374:
+        case 345: case 344:
             return false;
             
         default:
