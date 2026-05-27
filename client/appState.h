@@ -1,0 +1,17 @@
+#pragma once
+
+/**
+ * @enum AppState
+ * @brief Defines the different states of the client application, 
+ * used to manage the flow of the application and determine which screen should be displayed.
+ * 
+ */
+enum class AppState{
+    MAIN_MENU,  // Initial Main menu screen
+    CONNECTING, // Screen shown while connecting to the server
+    LOBBY,
+    IN_GAME,    // Main game screen where gameplay occurs
+    DISCONNECTED,
+    GAME_OVER,  // End game screen showing a summary of the game
+    EXIT
+};
