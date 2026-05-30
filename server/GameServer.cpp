@@ -132,7 +132,7 @@ void GameServer::ClientListener(int playerId, int sock){
 }
 
 void GameServer::resetPlayer(int playerId) {
-    players[playerId].setIsConnected(false);
+    // players[playerId].setIsConnected(false);
     players[playerId].setIsSeeker(false);
     players[playerId].setIsCaught(false);
     players[playerId].setIsRunning(false);
@@ -180,6 +180,8 @@ void GameServer::GameUpdateLoop() {
                 if(voteBackToLobby){
                     std::cout << " game reset\n";
                     currentState = GameState::LOBBY;
+
+                    logic->reset();
 
                     for (int i = 0; i < MAX_CLIENTS; i++) {
                         if (players[i].getIsConnected()) {

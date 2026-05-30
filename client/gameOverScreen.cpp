@@ -86,30 +86,25 @@ void GameOverScreen::draw() {
 
 
     int buttonY = screenHeight / 2 + 30;
-    bool isLobbySelected = (selectedOption == 0);
+    Color lobbyColor = (selectedOption == 0) ? LIGHTGRAY : DARKGRAY;
+    DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, lobbyColor);
 
-    Color lobbyBgColor = isLobbySelected ? (Color){ 50, 50, 70, 255 } : (Color){ 30, 30, 45, 255 };
-    Color lobbyBorderColor = isLobbySelected ? teamColor : GRAY;
-    if (backToLobbyPressed) lobbyBorderColor = teamColor;
 
-    DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, lobbyBgColor);
-    DrawRectangleLines(buttonX, buttonY, buttonWidth, buttonHeight, lobbyBorderColor);
+    DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, lobbyColor);
 
-    std::string lobbyText = backToLobbyPressed ? "OCZEKIWANIE..." : "POWROT DO LOBBY";
+    std::string lobbyText = backToLobbyPressed ? "WAITING..." : "BACK TO LOBBY";
     int lobbyTextWidth = MeasureText(lobbyText.c_str(), 20);
     DrawText(lobbyText.c_str(), buttonX + (buttonWidth / 2 - lobbyTextWidth / 2), buttonY + (buttonHeight / 2 - 10), 20, WHITE);
 
 
     int buttonExitY = buttonY + 70;
-    bool isExitSelected = (selectedOption == 1);
 
-    Color exitBgColor = isExitSelected ? (Color){ 70, 40, 40, 255 } : (Color){ 45, 25, 25, 255 };
-    Color exitBorderColor = isExitSelected ? RED : GRAY;
 
-    DrawRectangle(buttonX, buttonExitY, buttonWidth, buttonHeight, exitBgColor);
-    DrawRectangleLines(buttonX, buttonExitY, buttonWidth, buttonHeight, exitBorderColor);
+    Color exitColor = (selectedOption == 1) ? LIGHTGRAY : DARKGRAY;
 
-    std::string exitText = "WYJSCIE Z GRY";
+    DrawRectangle(buttonX, buttonExitY, buttonWidth, buttonHeight, exitColor);
+
+    std::string exitText = "EXIT GAME";
     int exitTextWidth = MeasureText(exitText.c_str(), 20);
     DrawText(exitText.c_str(), buttonX + (buttonWidth / 2 - exitTextWidth / 2), buttonExitY + (buttonHeight / 2 - 10), 20, WHITE);
 }

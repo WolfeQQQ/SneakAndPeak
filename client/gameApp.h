@@ -23,4 +23,5 @@ class GameApp {
         void changeState(AppState newState); // Function to change the current state
         Network networkClient; // Handles communication with the game server
         int playerId; // Unique identifier for the player, assigned by the server
+        GameStatePacket lastPacket;
 };

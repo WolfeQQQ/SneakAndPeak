@@ -89,6 +89,10 @@ AppState InGameScreen::update(){
             players[i] = packet.players[i];
         }
         gameTimer = packet.timer;
+        
+        if (packet.stage == GameState::GAME_OVER) {
+            return AppState::GAME_OVER;
+        }
     }
 
     // Update player animations based on the received game state
