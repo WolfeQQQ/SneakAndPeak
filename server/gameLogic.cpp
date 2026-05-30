@@ -446,7 +446,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             timeForPlayers = GAME_OVER_TIME - globalTime;
 
             if(globalTime > GAME_OVER_TIME) {
-                server->setIsRunning(false);
+                // server->setIsRunning(false);
                 break;
             }
             break;    
