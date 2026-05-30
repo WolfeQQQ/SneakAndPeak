@@ -60,7 +60,9 @@ class InGameScreen : public Screen {
         int playerPosLoc;   
         int ResolutionLoc;  
         int radiusLoc;      
-        int softnessLoc;    
+        int softnessLoc;   
+        
+        GameStatePacket lastPacket;
 
     public:
         /**
@@ -85,4 +87,6 @@ class InGameScreen : public Screen {
          * @brief Destructor, unloads textures, tilemap and shader resources.
          */
         ~InGameScreen();
+
+        GameStatePacket getLastPacket() const { return lastPacket; }
 };

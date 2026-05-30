@@ -84,7 +84,13 @@ void GameApp::changeState(AppState newState){
             // currentScreen = std::make_unique<DisconnectedScreen>();
             break;
         case AppState::GAME_OVER:
-             currentScreen = std::make_unique<GameOverScreen>();
+            if (currentScreen) {
+                auto inGame = dynamic_cast<InGameScreen*>(currentScreen.get());
+                if (inGame) {
+                    lastPacket = inGame->getLastPacket();
+                }
+            }
+             currentScreen = std::make_unique<GameOverScreen>(&networkClient, lastPacket);
             break;
         
     }

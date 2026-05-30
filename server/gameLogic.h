@@ -44,6 +44,7 @@ public:
      * @return false if game tick operates successfully.
      */
     bool gameTick(player players[4], GameServer* server);
+    void reset();
 
 private:
     std::chrono::steady_clock::time_point startTime;
@@ -123,5 +124,7 @@ private:
     bool isWalkable(int tileId);
 
     void runRadar(player currentPlyaer, player players[4]);
+
+
 };
 

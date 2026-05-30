@@ -473,3 +473,12 @@ bool gameLogic::isWalkable(int tileId) {
             return false;
     }
 }
+
+void gameLogic::reset() {
+    isStarted = false;  
+    stageStarted = false;   
+    timeForPlayers = LOBBY_TIME; 
+    seekerIndex = -1;        
+    globalTime = 0.0f;       // Czyścimy stary czas trwania gry
+    
+}
