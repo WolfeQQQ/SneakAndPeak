@@ -11,9 +11,28 @@
  */
 class SettingsScreen : public Screen {
     private: 
-        std::vector<std::string> options; 
         int selectedOption = 0; // Variable to track the currently selected menu option
-        bool isFullscreen = false;
+        const int optionsCount = 3; // resolution / fullscreen / exit
+
+        std::vector<Vector2> resolutionValues = {{1280,720},{1600,900},{1920,1080},{2560,1440}}; // List of available resolutions
+        int currentResolution = 0; // Currrent resolution index
+
+        std::vector<std::string> fullscreenValues ={"NUH UH", "HELL YEAH"};
+        int currentFullscreen = 0; 
+        Tilemap bgMap; // Map for the background looks;
+        Shader visionShader; 
+        RenderTexture2D lightMask;
+        Camera2D camera;
+
+        // Shader stuff
+        int playerPosLoc;
+        int resolutionLoc;
+        int radiusLoc;
+        int softnessLoc;
+
+        void applyResolution();
+        void applyFullscreen();
+
 
     public:
 

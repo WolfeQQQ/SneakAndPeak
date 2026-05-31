@@ -56,6 +56,8 @@
 
 #define VISION_SHADER_PATH "assets/shaders/vision.fs"
 
+#define MENU_CSV_PATH "assets/Menu.csv"
+
 #define CAMERA_ZOOM 1.5f
 
 #define WALK_FRAMES 4
