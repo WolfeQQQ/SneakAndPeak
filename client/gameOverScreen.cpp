@@ -54,8 +54,8 @@ AppState GameOverScreen::update(){
 void GameOverScreen::draw() {
     ClearBackground((Color){ 10, 10, 15, 255 });
 
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int screenWidth = VIRTUAL_WIDTH;
+    int screenHeight = VIRTUAL_HEIGHT;
 
     float pulse = sin(GetTime() * 3.0f) * 0.15f + 0.85f;
     
