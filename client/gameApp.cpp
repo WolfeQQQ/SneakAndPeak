@@ -1,10 +1,11 @@
+#include "../shared/contstants.h"
 #include "gameApp.h"
 #include "menuScreen.h"
 #include "inGameScreen.h"
-#include "../shared/contstants.h"
 #include "gameOverScreen.h"
+#include "settingsScreen.h"
 // #include more_screens
-#include "raylib.h"
+#include <cmath>
 
 /*
 Main application manager, responsible for initializing the window and managing the main game loop.
@@ -13,14 +14,23 @@ Handles the current state of the application and transitions beetween different 
 
 // Constructor, initializes the application window and sets the initial state
 GameApp::GameApp() {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sneak&Peak"); // Initialize the window with a title
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+
+
+    InitWindow(START_SCREEN_WIDTH, START_SCREEN_HEIGHT, "Sneak&Peak"); // Initialize the window with a title
     SetExitKey(0); // Disable the default ESC key behavior
+
+
+    virtualCanvas = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+    SetTextureFilter(virtualCanvas.texture, TEXTURE_FILTER_POINT);
 
     changeState(AppState::MAIN_MENU); // Game Starts with the main menu
 }
 
 // Destructor, cleans up resources
 GameApp::~GameApp() {
+
+    UnloadRenderTexture(virtualCanvas);
     CloseWindow(); // :O
 }
 
@@ -45,11 +55,33 @@ void GameApp::update(){
 
 // Simply calls the draw method of the current screen
 void GameApp::draw(){
+
+    BeginTextureMode(virtualCanvas);
+        ClearBackground(BLACK);
+        if(currentScreen && !isFading){
+            currentScreen -> draw();
+        }
+    EndTextureMode();
+
     BeginDrawing();
-    ClearBackground(BLACK);
-    if(currentScreen){
-        currentScreen->draw();
-    }
+        ClearBackground(BLACK);
+        
+        float scale = fminf((float)GetScreenWidth()/ VIRTUAL_WIDTH, (float) GetScreenHeight()/VIRTUAL_HEIGHT);
+        Rectangle sourceRec = {0.0f,0.0f,   (float)virtualCanvas.texture.width, -(float)virtualCanvas.texture.height};
+
+        Rectangle destRec = {
+            ((float)GetScreenWidth() - ((float)VIRTUAL_WIDTH * scale)) * 0.5f,
+            ((float)GetScreenHeight() - ((float)VIRTUAL_HEIGHT * scale)) * 0.5f,
+            (float)VIRTUAL_WIDTH * scale,
+            (float)VIRTUAL_HEIGHT * scale
+        };
+
+        DrawTexturePro(virtualCanvas.texture, sourceRec, destRec, (Vector2){ 0, 0 }, 0.0f, WHITE);
+
+        if (fadeAlpha > 0.0f) {
+            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, fadeAlpha));
+        }
+
     EndDrawing();
 }
 
@@ -91,6 +123,9 @@ void GameApp::changeState(AppState newState){
                 }
             }
              currentScreen = std::make_unique<GameOverScreen>(&networkClient, lastPacket);
+            break;
+        case AppState::SETTINGS:
+            currentScreen = std::make_unique<SettingsScreen>();
             break;
         
     }

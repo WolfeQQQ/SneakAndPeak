@@ -15,7 +15,7 @@ InGameScreen::InGameScreen(Network* networkClient, int playerId) {
     // Camera initialization.
     camera = { 0 }; 
     camera.target = (Vector2){0, 0};
-    camera.offset = (Vector2){GetScreenWidth()/2.0f, GetScreenHeight()/2.0f};
+    camera.offset = (Vector2){VIRTUAL_WIDTH/2.0f, VIRTUAL_HEIGHT/2.0f};
     camera.rotation = 0.0f;
     camera.zoom = CAMERA_ZOOM;
 
@@ -35,8 +35,13 @@ InGameScreen::InGameScreen(Network* networkClient, int playerId) {
     tilemap.load(MAP_CSV_PATH, TILESET_PATH, TILE_SIZE); 
 
     // Initialize render textures for the main game view and the raycasted light mask
-    canvas = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-    lightMask = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    canvas = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+    lightMask = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+    // Fix for the first frame blink
+    BeginTextureMode(lightMask); 
+        ClearBackground((Color){ 30, 30, 40, 255 }); 
+    EndTextureMode();
 
     // Load the vision shader
     visionShader = LoadShader(0, VISION_SHADER_PATH);
@@ -47,7 +52,7 @@ InGameScreen::InGameScreen(Network* networkClient, int playerId) {
     radiusLoc = GetShaderLocation(visionShader, "radius");
     softnessLoc = GetShaderLocation(visionShader, "softness");
 
-    float resolution[2] = {(float)GetScreenWidth(), (float)GetScreenHeight()};
+    float resolution[2] = {(float)VIRTUAL_WIDTH, (float)VIRTUAL_HEIGHT};
     SetShaderValue(visionShader, ResolutionLoc, resolution, SHADER_UNIFORM_VEC2); // Set the resolution uniform in the shader because it doesn't change
 }
 
@@ -139,12 +144,6 @@ AppState InGameScreen::update(){
     
     camera.target = (Vector2){std::round(myPlayer.getX()) + PLAYER_WIDTH/2, std::round(myPlayer.getY())+PLAYER_LENGTH/2}; // Update the camera target
 
-    return AppState::IN_GAME; 
-}
-
-// Renders whole game screen
-void InGameScreen::draw(){
-
     BeginTextureMode(lightMask);
 
         ClearBackground((Color){ 30, 30, 40, 255 }); // Clears the BG with a dark color to create the shadow effect
@@ -183,11 +182,17 @@ void InGameScreen::draw(){
             }
             DrawTriangle(center, points[0], points.back(), WHITE);
 
-            
-
         EndMode2D();
     EndTextureMode();
 
+
+    return AppState::IN_GAME; 
+}
+
+// Renders whole game screen
+void InGameScreen::draw(){
+
+    
     // Start of the main game rendering
     BeginMode2D(camera);
         tilemap.draw(); // Draw the tilemap first so players are rendered on top of it
@@ -258,7 +263,7 @@ void InGameScreen::draw(){
     Vector2 wPlayerPos = {myPlayer.getX()+PLAYER_WIDTH/2, myPlayer.getY()+PLAYER_LENGTH/2}; // World position of the player, used for shader calculations
     Vector2 screenPlayerPos = GetWorldToScreen2D(wPlayerPos, camera); // Convert the world position to screen coordinates
 
-    float playerPos[2] = {screenPlayerPos.x, screenPlayerPos.y};
+    float playerPos[2] = {screenPlayerPos.x, (float)VIRTUAL_HEIGHT - screenPlayerPos.y};
     float radiusUniform = VISION_RADIUS;
     float softness = VISION_SOFTNESS;
     
@@ -291,6 +296,6 @@ void InGameScreen::draw(){
     DrawText("Stamina: ", 10, 10, 20,WHITE);
     DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
     DrawRectangleLines(10,40, 200, 20, WHITE);
-    DrawText(std::to_string(gameTimer).c_str(),GetScreenWidth()/2 - 25, 20, 20, WHITE);
+    DrawText(std::to_string(gameTimer).c_str(),VIRTUAL_WIDTH/2 - 25, 20, 20, WHITE);
    
 }

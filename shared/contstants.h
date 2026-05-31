@@ -31,6 +31,13 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
+
+#define VIRTUAL_WIDTH 1280
+#define VIRTUAL_HEIGHT 720
+
+#define START_SCREEN_WIDTH 1280 
+#define START_SCREEN_HEIGHT 720
+
 #define SERVER_IP "127.0.0.1"
 
 #define VISION_RADIUS 300.0f
@@ -48,6 +55,8 @@
 #define SEEKER_DEATH_PATH "assets/player/red/death.png"
 
 #define VISION_SHADER_PATH "assets/shaders/vision.fs"
+
+#define MENU_CSV_PATH "assets/Menu.csv"
 
 #define CAMERA_ZOOM 1.5f
 
