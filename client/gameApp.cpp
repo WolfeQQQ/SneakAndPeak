@@ -4,6 +4,7 @@
 #include "inGameScreen.h"
 #include "gameOverScreen.h"
 #include "settingsScreen.h"
+#include "lobbyScreen.h"
 // #include more_screens
 #include <cmath>
 
@@ -44,10 +45,38 @@ void GameApp::run(){
 
 // Method that handles the application state changes and calls the update method of the current screen
 void GameApp::update(){
-    if(currentScreen){
-        AppState newState = currentScreen->update();
-        if (newState != currentState){
-            changeState(newState);
+    if(isFading){
+
+        float fadeSpeed = 3.0f;
+        if (fadeState == 1) { 
+            fadeAlpha += GetFrameTime() * fadeSpeed;
+            if (fadeAlpha >= 1.0f) {
+                fadeAlpha = 1.0f;
+                applyPendingState(); 
+                fadeState = 2;      
+            }
+        } 
+
+        else if (fadeState == 2) { 
+            fadeAlpha -= GetFrameTime() * fadeSpeed;
+            if (fadeAlpha <= 0.0f) {
+                fadeAlpha = 0.0f;
+                isFading = false;    
+                fadeState = 0;
+            }
+        }
+
+        if (currentScreen) { // Allow the shaders to render before player sees them
+            currentScreen->update();
+        }
+
+    }
+    else{
+        if(currentScreen){
+            AppState newState = currentScreen->update();
+            if (newState != currentState){
+                changeState(newState);
+            }
         }
     }
 
@@ -58,9 +87,11 @@ void GameApp::draw(){
 
     BeginTextureMode(virtualCanvas);
         ClearBackground(BLACK);
-        if(currentScreen && !isFading){
+
+        if(currentScreen){
             currentScreen -> draw();
         }
+
     EndTextureMode();
 
     BeginDrawing();
@@ -87,17 +118,50 @@ void GameApp::draw(){
 
 // Game's state manager, Destroy the current screen and create a new one based on the state
 void GameApp::changeState(AppState newState){
-    currentState = newState;
-    switch(newState){
+    if (currentScreen == nullptr){
+        pendingState = newState;
+        applyPendingState();
+    }
+
+    else if (newState == AppState::CONNECTING){
+        pendingState = newState;
+        applyPendingState();
+
+        if(currentState == AppState::IN_GAME){
+            isFading = true;
+            fadeState = 2;
+            fadeAlpha = 1.0f;
+        }
+    }
+    else{
+        pendingState = newState;
+        isFading = true;
+        fadeState = 1;      
+        fadeAlpha = 0.0f;
+    }
+}
+
+void GameApp::applyPendingState() {
+    currentState = pendingState;
+    switch(pendingState){
         case AppState::MAIN_MENU:
             currentScreen = std::make_unique<MenuScreen>();
             break;
-        case AppState::CONNECTING:  // State that attempts to conect to the server, if successful, starts the game.
+        case AppState::CONNECTING: {
+         // State that attempts to conect to the server, if successful, starts the game.
+            std::string IP = SERVER_IP;
+            int port = SERVER_PORT;
 
-            //currentScreen = std::make_unique<ConnectingScreen>();
+            if(currentScreen){
+                auto lobby = dynamic_cast<LobbyScreen*>(currentScreen.get());
+                if (lobby) {
+                    IP = lobby->getIP();
+                    port = lobby->getPort();
+                }
+            }
 
-            if(networkClient.ConnectToServer(SERVER_IP, SERVER_PORT, &playerId)==true)
-            { //MOVE TO CONNECTING SCREEN
+            if(networkClient.ConnectToServer(IP.c_str(), port, &playerId)==true)
+            { 
                 changeState(AppState::IN_GAME);
             } 
             else {
@@ -105,9 +169,10 @@ void GameApp::changeState(AppState newState){
                 //changeState(AppState::DISCONNECTED);
             }
             break;
+        }
 
         case AppState::LOBBY:
-            // currentScreen = std::make_unique<LobbyScreen>();
+            currentScreen = std::make_unique<LobbyScreen>();
             break;
         case AppState::IN_GAME:
             currentScreen = std::make_unique<InGameScreen>(&networkClient, playerId);

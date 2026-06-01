@@ -107,6 +107,6 @@ Sneak & Peak is divided into three main components:
 * [x] Dynamic Lighting
 * [x] Animated Main Menu
 * [x] Basic TCP Client/Server synchronization
-* [ ] *UI overhaul*
+* [x] *UI overhaul*
 * [ ] *Audio & sfx*
 * [ ] *Proper Game Over screen*
