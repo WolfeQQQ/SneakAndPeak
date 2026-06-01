@@ -79,14 +79,14 @@ void GameOverScreen::draw() {
 
     int descFontSize = 20;
     int descWidth = MeasureText(descText.c_str(), descFontSize);
-    DrawText(descText.c_str(), screenWidth / 2 - descWidth / 2, screenHeight / 4 + 70, descFontSize, LIGHTGRAY);
+    DrawText(descText.c_str(), screenWidth / 2 - descWidth / 2, screenHeight / 4 + 70, descFontSize, WHITE);
     int buttonWidth = 250;
     int buttonHeight = 50;
     int buttonX = screenWidth / 2 - buttonWidth / 2; 
 
 
     int buttonY = screenHeight / 2 + 30;
-    Color lobbyColor = (selectedOption == 0) ? LIGHTGRAY : DARKGRAY;
+    Color lobbyColor = (selectedOption == 0) ? WHITE : DARKGRAY;
     DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, lobbyColor);
 
 
@@ -100,7 +100,7 @@ void GameOverScreen::draw() {
     int buttonExitY = buttonY + 70;
 
 
-    Color exitColor = (selectedOption == 1) ? LIGHTGRAY : DARKGRAY;
+    Color exitColor = (selectedOption == 1) ? WHITE : DARKGRAY;
 
     DrawRectangle(buttonX, buttonExitY, buttonWidth, buttonHeight, exitColor);
 

@@ -1,6 +1,5 @@
 #include "settingsScreen.h"
 #include "../shared/contstants.h"
-#include "raylib.h"
 #include <string>
 #include <cmath>
 
@@ -63,6 +62,7 @@ AppState SettingsScreen::update() {
             applyResolution();
         }
     }
+    else selectedOption = 1;
     }
     else if(selectedOption == 1){
         if(IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)){
@@ -82,8 +82,8 @@ AppState SettingsScreen::update() {
 
     BeginTextureMode(lightMask);
         ClearBackground((Color){ 30, 30, 40, 255 }); 
-
-        DrawCircleGradient(Vector2{VIRTUAL_WIDTH/2 + 175, VIRTUAL_HEIGHT/2}, 300, WHITE, (Color){ 30, 30, 40, 255 });
+        DrawCircleGradient(Vector2{VIRTUAL_WIDTH + 175, VIRTUAL_HEIGHT}, 1500, WHITE, (Color){ 30, 30, 40, 255 });
+        //DrawCircleGradient(Vector2{VIRTUAL_WIDTH/2 + 175, VIRTUAL_HEIGHT/2}, 300, WHITE, (Color){ 30, 30, 40, 255 });
     EndTextureMode();
 
 
@@ -136,39 +136,39 @@ void SettingsScreen::draw() {
 
     DrawText("SETTINGS", 100, VIRTUAL_HEIGHT/ 2 - 300, 100, WHITE);
 
-    int startX = 200;
+    int startX = 100;
     int startY = 200;
     int spacing = 120;
 
     //TODO BETTER PLACEMENT
     Color c1;
     if (currentFullscreen == 1) {
-        c1 = DARKGRAY; // Gdy Fullscreen jest "YEAH", opcja rozdzielczości jest szara (nieaktywna)
+        c1 = DARKGRAY;
     } else {
         c1 = (selectedOption == 0) ? YELLOW : WHITE;
     }
 
     std::string resText = std::to_string((int)resolutionValues[currentResolution].x) + "x" + std::to_string((int)resolutionValues[currentResolution].y);
     
-    DrawText("resolution", startX - MeasureText("resolution", 30)/2, startY, 30, c1);
-    DrawText("<", startX - 100, startY + 40, 40, c1);
-    DrawText(resText.c_str(), startX - MeasureText(resText.c_str() + 50, 40)/2, startY + 40, 40, c1);
-    DrawText(">", startX + 180, startY + 40, 40, c1);
+    DrawText("resolution", startX, startY, 30, c1);
+    DrawText("<", startX, startY + 40, 40, c1);
+    DrawText(resText.c_str(), startX + 30, startY + 40, 40, c1);
+    DrawText(">", startX + MeasureText(resText.c_str(), 40) + 50, startY + 40, 40, c1);
 
 
     Color c2 = (selectedOption == 1) ? YELLOW : WHITE;
     std::string fsText = (currentFullscreen == 1) ? "YEAH" : "NAH"; 
     
-    DrawText("fullscreen", startX - MeasureText("fullscreen", 30)/2, startY + spacing, 30, c2);
-    DrawText("<", startX - 100, startY + spacing + 40, 40, c2);
-    DrawText(fsText.c_str(), startX - MeasureText(fsText.c_str(), 40)/2, startY + spacing + 40, 40, c2);
-    DrawText(">", startX + 80, startY + spacing + 40, 40, c2);
+    DrawText("fullscreen", startX, startY + spacing, 30, c2);
+    DrawText("<", startX, startY + spacing + 40, 40, c2);
+    DrawText(fsText.c_str(), startX + 30, startY + spacing + 40, 40, c2);
+    DrawText(">", startX + MeasureText(fsText.c_str(), 40) + 50, startY + spacing + 40, 40, c2);
 
     Color c3 = (selectedOption == 2) ? BLACK : WHITE;
     Color b3 = (selectedOption == 2) ? WHITE : DARKGRAY;
-    Rectangle exitBtn = { 100, (float)startY + spacing * 2 + 20, 300, 75 };
+    Rectangle exit = { 100, (float)startY + spacing * 2, 300, 75 };
     
-    DrawRectangleRec(exitBtn, b3);
-    DrawText("exit to menu", startX - MeasureText("exit to menu", 25)/2, exitBtn.y + 17, 25, c3);
+    DrawRectangleRec(exit, b3);
+    DrawText("Back to menu", startX +20, exit.y + 20, 30, c3);
 
 }

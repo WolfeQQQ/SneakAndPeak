@@ -57,8 +57,10 @@ MenuScreen::MenuScreen() {
     }
     
     // Set the player coordinates to the first waypoint
-    menuPlayer.setX(waypoints[0].x);
-    menuPlayer.setY(waypoints[0].y);
+    int startPos = rand() % gridWaypoints.size();
+    currentWaypoint = startPos;
+    menuPlayer.setX(waypoints[startPos].x);
+    menuPlayer.setY(waypoints[startPos].y);
 
     menuPlayer.setDirection(player::Direction::LEFT);
     menuPlayer.setPlayerState(player::PlayerState::WALK);
@@ -89,7 +91,7 @@ AppState MenuScreen::update(){
     if (IsKeyPressed(KEY_ENTER)){
         switch (selectedOption){
             case 0:
-                return AppState::CONNECTING;
+                return AppState::LOBBY;
                 break;
             case 1:   
                 return AppState::EXIT;      
@@ -242,21 +244,30 @@ void MenuScreen::draw(){
     //UI ELEMENTS
     //UI ELEMENTS 
 
+    int startX = 100;
+    int startY = 200;
+    int spacing = 120;
+
     // Colors for the currently selected and non-selected options
-    Color startColor = (selectedOption == 0) ? LIGHTGRAY : DARKGRAY; 
-    Color exitColor = (selectedOption == 1) ? LIGHTGRAY : DARKGRAY; 
-    Color settingsColor = (selectedOption == 2) ? LIGHTGRAY : DARKGRAY;
+    Color b1 = (selectedOption == 0) ? WHITE : DARKGRAY; 
+    Color b2 = (selectedOption == 1) ? WHITE : DARKGRAY; 
+    Color b3 = (selectedOption == 2) ? WHITE : DARKGRAY;
+
+    Color c1 = (selectedOption == 0) ? BLACK : WHITE;
+    Color c2 = (selectedOption == 1) ? BLACK : WHITE; 
+    Color c3 = (selectedOption == 2) ? BLACK : WHITE;
+
     
     DrawText("SNEAK&PEAK", 100, VIRTUAL_HEIGHT/ 2 - 300, 100, WHITE); // TODO - center text properly
     
-    DrawRectangle(100, 200, 300, 75, startColor); 
-    DrawText("Start Game", 110, 220, 30, BLACK);   // TODO -  Buttons too...
+    DrawRectangle(100, 200, 300, 75, b1); 
+    DrawText("Start Game", 110, 220, 30, c1);   // TODO -  Buttons too...
     
-    DrawRectangle(100, 320, 300, 75, settingsColor);
-    DrawText("Settings", 110, 340, 30, BLACK);
+    DrawRectangle(100, 320, 300, 75, b3);
+    DrawText("Settings", 110, 340, 30, c3);
 
-    DrawRectangle(100, 440, 300, 75, exitColor);
-    DrawText("Exit", 110, 460, 30, BLACK);
+    DrawRectangle(100, 440, 300, 75, b2);
+    DrawText("Exit", 110, 460, 30, c2);
 
     //TODO COORDINATES AND SIZE ADJUSTMENTS
 }
