@@ -475,10 +475,20 @@ bool gameLogic::isWalkable(int tileId) {
 }
 
 void gameLogic::reset() {
-    isStarted = false;  
-    stageStarted = false;   
-    timeForPlayers = LOBBY_TIME; 
-    seekerIndex = -1;        
-    globalTime = 0.0f;       // Czyścimy stary czas trwania gry
+
+    bool crashFlag = loadMap();
+    if(crashFlag) {
+        std::cout << "[CRITICAL ERROR] Blad przeladowania mapy podczas restartu!\n";
+    }
+
+
+    isStarted = true;       
+    stageStarted = false;    
     
+
+    timeForPlayers = LOBBY_TIME; 
+    globalTime = 0.0f;       
+    seekerIndex = -1; 
+    
+    std::cout << "[GameLogic] Pomyslnie zresetowano zegary i przeladowano mape do stanu LOBBY!\n";
 }

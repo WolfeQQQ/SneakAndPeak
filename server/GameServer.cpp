@@ -136,10 +136,15 @@ void GameServer::resetPlayer(int playerId) {
     players[playerId].setIsSeeker(false);
     players[playerId].setIsCaught(false);
     players[playerId].setIsRunning(false);
+    players[playerId].setViewing(false);
+    players[playerId].setViewingSpeed(false);
+    players[playerId].setPlayerState(player::PlayerState::IDLE);
+
     players[playerId].setX(529.0f);
     players[playerId].setY(529.0f);
     players[playerId].setSpeed(144.0f);
     players[playerId].setStamina(100.0f);
+    players[playerId].setAbilityCooldown(0.0f);
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
     lastInputTime[playerId] = std::chrono::steady_clock::now();
