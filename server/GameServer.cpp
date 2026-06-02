@@ -132,7 +132,7 @@ void GameServer::ClientListener(int playerId, int sock){
 }
 
 void GameServer::resetPlayer(int playerId) {
-    // players[playerId].setIsConnected(false);
+    players[playerId].setIsConnected(false);
     players[playerId].setIsSeeker(false);
     players[playerId].setIsCaught(false);
     players[playerId].setIsRunning(false);
@@ -148,6 +148,20 @@ void GameServer::resetPlayer(int playerId) {
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
     lastInputTime[playerId] = std::chrono::steady_clock::now();
+}
+
+void GameServer::spawnPoints(int playerId) {
+    for(int i = 0 ; i < MAX_CLIENTS; i++){
+        if(players[i].getIsConnected()==true){
+            if(players[playerId].getIsSeeker() == true){
+                players[i].setX(529.0f); 
+                players[i].setY(529.0f);
+            }
+            players[i].setX(493.0f + i * 36.0f); 
+            players[i].setY(727.0f);
+        }
+        
+    }
 }
 
 void GameServer::GameUpdateLoop() {
@@ -225,7 +239,7 @@ void GameServer::StateToUpload(){
     for(int i = 0; i < MAX_CLIENTS; i++){
         if(players[i].getIsConnected() == true){
             // Wysyłamy strukturę pakietu zamiast samej tablicy players
-            send(clientSockets[i], &packet, sizeof(GameStatePacket), 0);
+            send(clientSockets[i], &packet, sizeof(GameStatePacket), MSG_NOSIGNAL);
         }
     }
 }

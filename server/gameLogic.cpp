@@ -387,6 +387,9 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             */
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
+            for(int i = 0 ; i < 4; i++){
+                server->spawnPoints(i);
+            }
 
             break;
         }

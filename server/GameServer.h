@@ -116,5 +116,7 @@ public:
      */
     void resetPlayer(int playerId);
 
+    void spawnPoints(int playerId);
+
 
 };
