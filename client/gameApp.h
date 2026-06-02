@@ -26,7 +26,12 @@ class GameApp {
         int playerId; // Unique identifier for the player, assigned by the server
         GameStatePacket lastPacket;
         RenderTexture2D virtualCanvas;
+
+        // Fade animation system
         bool isFading = false;
         float fadeAlpha = 0.0f;
+        int fadeState = 0; // 0-none, 1-fadeOut, 2-fadeIn
         AppState pendingState;
+
+        void applyPendingState(); // 
 };
