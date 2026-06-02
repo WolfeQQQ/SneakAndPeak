@@ -132,17 +132,35 @@ void GameServer::ClientListener(int playerId, int sock){
 }
 
 void GameServer::resetPlayer(int playerId) {
-    // players[playerId].setIsConnected(false);
+    players[playerId].setIsConnected(false);
     players[playerId].setIsSeeker(false);
     players[playerId].setIsCaught(false);
     players[playerId].setIsRunning(false);
+    players[playerId].setViewing(false);
+    players[playerId].setViewingSpeed(false);
+    players[playerId].setPlayerState(player::PlayerState::IDLE);
+
     players[playerId].setX(529.0f);
     players[playerId].setY(529.0f);
     players[playerId].setSpeed(144.0f);
     players[playerId].setStamina(100.0f);
+    players[playerId].setAbilityCooldown(0.0f);
     players[playerId].setDirection(player::Direction::DOWN);
     std::memset(&clientInputs[playerId], 0, sizeof(player::ClientInput));
     lastInputTime[playerId] = std::chrono::steady_clock::now();
+}
+
+void GameServer::spawnPoints(int playerId) {
+        if(players[playerId].getIsConnected()==true){
+            if(players[playerId].getIsSeeker()==true){
+                players[playerId].setX(529.0f); 
+                players[playerId].setY(529.0f);
+            }
+            else{
+            players[playerId].setX(493.0f + playerId * 36.0f); 
+            players[playerId].setY(724.0f);
+            }
+        }
 }
 
 void GameServer::GameUpdateLoop() {
@@ -220,7 +238,7 @@ void GameServer::StateToUpload(){
     for(int i = 0; i < MAX_CLIENTS; i++){
         if(players[i].getIsConnected() == true){
             // Wysyłamy strukturę pakietu zamiast samej tablicy players
-            send(clientSockets[i], &packet, sizeof(GameStatePacket), 0);
+            send(clientSockets[i], &packet, sizeof(GameStatePacket), MSG_NOSIGNAL);
         }
     }
 }

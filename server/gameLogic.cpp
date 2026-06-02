@@ -361,6 +361,10 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             seekerIndex = possibleSeekers[distrib(gen)];
             players[seekerIndex].setIsSeeker(true);
             players[seekerIndex].setSpeed(SEEKER_SPEED);
+
+            for(int i = 0 ; i < 4; i++){
+                server->spawnPoints(i);
+            }
         }
     }
 
@@ -370,30 +374,23 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     //game state handler
     switch (server->getGameStage()) {
         case GameState::LOBBY: {
-            timeForPlayers = LOBBY_TIME - globalTime;
-            //first check
-            if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
-
             if(connectedPlayers == 0) {
                 startTime = currentTime;
-                lastTime = startTime;
-                break;
+                globalTime = 0.0f;
             }
 
-            /*if(connectedPlayers < 2) {
-                server->setIsRunning(false);
-                break;
-            }
-            */
+            timeForPlayers = LOBBY_TIME - globalTime;
+            if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
+
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
-
             break;
         }
         case GameState::COUNTDOWN: {
 
             timeForPlayers = COUNTDOWN_TIME - globalTime;
             bool seekerOnline = players[seekerIndex].getIsConnected();
+            
 
             if(connectedPlayers < 2 || !seekerOnline){
 
@@ -475,10 +472,20 @@ bool gameLogic::isWalkable(int tileId) {
 }
 
 void gameLogic::reset() {
-    isStarted = false;  
-    stageStarted = false;   
-    timeForPlayers = LOBBY_TIME; 
-    seekerIndex = -1;        
-    globalTime = 0.0f;       // Czyścimy stary czas trwania gry
+
+    bool crashFlag = loadMap();
+    if(crashFlag) {
+        std::cout << "[CRITICAL ERROR] Blad przeladowania mapy podczas restartu!\n";
+    }
+
+
+    isStarted = true;       
+    stageStarted = false;    
     
+
+    timeForPlayers = LOBBY_TIME; 
+    globalTime = 0.0f;       
+    seekerIndex = -1; 
+    
+    std::cout << "[GameLogic] Pomyslnie zresetowano zegary i przeladowano mape do stanu LOBBY!\n";
 }
