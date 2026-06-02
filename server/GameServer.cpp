@@ -151,17 +151,16 @@ void GameServer::resetPlayer(int playerId) {
 }
 
 void GameServer::spawnPoints(int playerId) {
-    for(int i = 0 ; i < MAX_CLIENTS; i++){
-        if(players[i].getIsConnected()==true){
-            if(players[playerId].getIsSeeker() == true){
-                players[i].setX(529.0f); 
-                players[i].setY(529.0f);
+        if(players[playerId].getIsConnected()==true){
+            if(players[playerId].getIsSeeker()==true){
+                players[playerId].setX(529.0f); 
+                players[playerId].setY(529.0f);
             }
-            players[i].setX(493.0f + i * 36.0f); 
-            players[i].setY(727.0f);
+            else{
+            players[playerId].setX(493.0f + playerId * 36.0f); 
+            players[playerId].setY(724.0f);
+            }
         }
-        
-    }
 }
 
 void GameServer::GameUpdateLoop() {

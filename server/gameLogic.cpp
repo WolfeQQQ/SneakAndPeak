@@ -361,6 +361,10 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             seekerIndex = possibleSeekers[distrib(gen)];
             players[seekerIndex].setIsSeeker(true);
             players[seekerIndex].setSpeed(SEEKER_SPEED);
+
+            for(int i = 0 ; i < 4; i++){
+                server->spawnPoints(i);
+            }
         }
     }
 
@@ -370,33 +374,23 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
     //game state handler
     switch (server->getGameStage()) {
         case GameState::LOBBY: {
-            timeForPlayers = LOBBY_TIME - globalTime;
-            //first check
-            if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
-
             if(connectedPlayers == 0) {
                 startTime = currentTime;
-                lastTime = startTime;
-                break;
+                globalTime = 0.0f;
             }
 
-            /*if(connectedPlayers < 2) {
-                server->setIsRunning(false);
-                break;
-            }
-            */
+            timeForPlayers = LOBBY_TIME - globalTime;
+            if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
+
             stageStarted = false;
             server->setGameStage(GameState::COUNTDOWN);
-            for(int i = 0 ; i < 4; i++){
-                server->spawnPoints(i);
-            }
-
             break;
         }
         case GameState::COUNTDOWN: {
 
             timeForPlayers = COUNTDOWN_TIME - globalTime;
             bool seekerOnline = players[seekerIndex].getIsConnected();
+            
 
             if(connectedPlayers < 2 || !seekerOnline){
 
