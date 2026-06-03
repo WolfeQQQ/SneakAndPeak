@@ -47,11 +47,21 @@ SettingsScreen :: ~SettingsScreen(){
 
 
 AppState SettingsScreen::update() {
-    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) selectedOption = (selectedOption + 1) % optionsCount;
-    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) selectedOption = (selectedOption - 1 < 0) ? optionsCount - 1 : selectedOption - 1;
+    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)){ 
+        selectedOption = (selectedOption + 1) % optionsCount;
 
+        if (currentFullscreen == 1 && selectedOption == 0) {
+            selectedOption = 1; 
+        }
+    }
+    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
+        selectedOption = (selectedOption - 1 < 0) ? optionsCount - 1 : selectedOption - 1;
+        
+        if (currentFullscreen == 1 && selectedOption == 0) {
+            selectedOption = optionsCount - 1; 
+        }
+    }
     if(selectedOption == 0){
-        if(currentFullscreen == 0){
         if(IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)){
             currentResolution = (currentResolution + 1) % resolutionValues.size();
         }
@@ -61,8 +71,7 @@ AppState SettingsScreen::update() {
         if(IsKeyPressed(KEY_ENTER)){
             applyResolution();
         }
-    }
-    else selectedOption = 1;
+  
     }
     else if(selectedOption == 1){
         if(IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)){
@@ -86,8 +95,6 @@ AppState SettingsScreen::update() {
         //DrawCircleGradient(Vector2{VIRTUAL_WIDTH/2 + 175, VIRTUAL_HEIGHT/2}, 300, WHITE, (Color){ 30, 30, 40, 255 });
     EndTextureMode();
 
-
-
     return AppState::SETTINGS; 
 }
 
@@ -104,8 +111,6 @@ void SettingsScreen::applyFullscreen() {
         ToggleFullscreen();
     }
 }
-
-
 
 void SettingsScreen::draw() {
 
@@ -170,5 +175,7 @@ void SettingsScreen::draw() {
     
     DrawRectangleRec(exit, b3);
     DrawText("Back to menu", startX +20, exit.y + 20, 30, c3);
+
+    DrawText("[Enter] - Apply", VIRTUAL_WIDTH - MeasureText("[Enter] - Apply",20) - 5, VIRTUAL_HEIGHT - 20, 20, WHITE);
 
 }
