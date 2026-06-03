@@ -41,12 +41,12 @@ AppState LobbyScreen :: update(){
         int key = GetCharPressed();
         while(key > 0){
             //ip
-            if(active == 0){
-                if(ipInput.length() < 16) ipInput += (char)key;
+            if(active == 0 && (key >= 48 && key <= 57) || key == 46 ){ // Data vaidation
+                if(ipInput.length() < 15) ipInput += (char)key;
             }
             //port
-            else if(active == 1){
-                if (portInput.length() < 5) portInput += (char)key;
+            else if(active == 1 && key >= 48 && key <= 57){ // Data validation
+                if (portInput.length() < 4) portInput += (char)key;
             }
             key = GetCharPressed();
         }
@@ -119,12 +119,12 @@ void LobbyScreen :: draw(){
     Color b4 = (active == 3) ? WHITE : DARKGRAY;
 
     DrawText("IP Address:", startX, startY, 30, c1);
-    DrawRectangleLines(startX, startY + 40, 200,50,c1);
+    DrawRectangleLines(startX, startY + 40, 300,50,c1);
     DrawText(ipInput.c_str(), startX + 10, startY + 50, 30, c1);
     if (active == 0 && (frameCounter / 20) % 2 == 0) DrawText(" |", startX + 10 + MeasureText(ipInput.c_str(), 30), startY + 50, 30, c1);
 
     DrawText("Port:", startX, startY+spacing, 30, c2);
-    DrawRectangleLines(startX, startY + spacing + 40, 200,50, c2);
+    DrawRectangleLines(startX, startY + spacing + 40, 300,50, c2);
     DrawText(portInput.c_str(), startX + 10, startY + spacing + 50, 30, c2);
     if (active == 1 && (frameCounter / 20) % 2 == 0) DrawText(" |", startX + 10 + MeasureText(portInput.c_str(), 30), startY + spacing + 50, 30, c2);
 

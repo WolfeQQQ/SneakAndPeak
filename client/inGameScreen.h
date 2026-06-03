@@ -38,13 +38,11 @@ class InGameScreen : public Screen {
         Texture2D seekerDeathTexture;
 
         // Textures for the stamina bar UI element
-        Texture2D staminaBarTexture; 
-        Texture2D staminaFillTexture; 
 
-        
         PlayerAnimation playerAnim[4];  // All players animation states
         Camera2D camera;    // Raylib camera used to track the player's location
         player myPlayer;    // Local copy of client's player data. Used for camera tracking
+        player seeker;      // Local copy of the seeker
         player players[4];  // Array to hold the state of all players
         float gameTimer;    // Global game timer, received from the server
         Network* network;   // Pointer to the network object
@@ -67,6 +65,12 @@ class InGameScreen : public Screen {
         bool showReveal;
         float revealTimer = 0.0f;
         GameStatePacket lastPacket;
+
+        float abilityCooldown  = 0.0f;
+        bool wasUsingAbility = false;
+
+        float bannerTimer = 0.0f;
+        std::string bannerText = "";
 
     public:
         /**

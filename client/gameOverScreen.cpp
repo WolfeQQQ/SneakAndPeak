@@ -6,19 +6,43 @@ GameOverScreen::GameOverScreen(Network * clientNetwork, const GameStatePacket& f
     network = clientNetwork;
     lastPacket = finalPacket;
     backToLobbyPressed = false;
-    selectedOption = 0;
+
+    bgMap.load(MENU_CSV_PATH, TILESET_PATH, TILE_SIZE);
+
+    visionShader = LoadShader(0, VISION_SHADER_PATH);
+    playerPosLoc = GetShaderLocation(visionShader, "playerPos");
+    resolutionLoc = GetShaderLocation(visionShader, "resolution");
+    radiusLoc = GetShaderLocation(visionShader, "radius");
+    softnessLoc = GetShaderLocation(visionShader, "softness");
+
+    lightMask = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+     
+    BeginTextureMode(lightMask); 
+        ClearBackground((Color){ 30, 30, 40, 255 }); 
+    EndTextureMode();
+
+    camera = { 0 };
+    camera.target = (Vector2){10.0f * TILE_SIZE, 10.0f *TILE_SIZE}; // Lock the camera for better appearance
+    camera.offset = (Vector2){VIRTUAL_WIDTH/2.0f, VIRTUAL_HEIGHT/2.0f};
+    camera.rotation = 0.0f;
+    camera.zoom = CAMERA_ZOOM;
+
 }
 
-GameOverScreen::~GameOverScreen() {}
+GameOverScreen::~GameOverScreen() {
+    bgMap.unload();
+    UnloadShader(visionShader);
+    UnloadRenderTexture(lightMask); 
+}
 
 AppState GameOverScreen::update(){
-    if (IsKeyPressed(KEY_S)) {
+    if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
         selectedOption++;
         if (selectedOption >= optionsCount) {
             selectedOption = 0; 
         }
     }
-    if (IsKeyPressed(KEY_W)) {
+    if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
         selectedOption--;
         if (selectedOption < 0) {
             selectedOption = optionsCount - 1; 
@@ -38,7 +62,7 @@ AppState GameOverScreen::update(){
             backToLobbyPressed = true;
         } 
         else if (selectedOption == 1) {
-            return AppState::EXIT;
+            return AppState::MAIN_MENU;
         }
     }
     GameStatePacket packet;
@@ -48,11 +72,37 @@ AppState GameOverScreen::update(){
         }
     }
 
+    BeginTextureMode(lightMask);
+        ClearBackground((Color){ 30, 30, 40, 255 }); 
+        DrawCircleGradient(Vector2{VIRTUAL_WIDTH + 175, VIRTUAL_HEIGHT}, 1500, WHITE, (Color){ 30, 30, 40, 255 });
+    EndTextureMode();
+
     return AppState::GAME_OVER;
 }
 
 void GameOverScreen::draw() {
-    ClearBackground((Color){ 10, 10, 15, 255 });
+
+    BeginMode2D(camera);
+        bgMap.draw();
+    EndMode2D();
+
+    float centerPos[2] = { (float)VIRTUAL_WIDTH/2, (float)VIRTUAL_HEIGHT/2 };
+    float resolution[2] = { (float)VIRTUAL_WIDTH, (float)VIRTUAL_HEIGHT };
+    float radius = VISION_RADIUS;
+    float softness = VISION_SOFTNESS + 200; 
+
+    SetShaderValue(visionShader, playerPosLoc, centerPos, SHADER_UNIFORM_VEC2);
+    SetShaderValue(visionShader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
+    SetShaderValue(visionShader, radiusLoc, &radius, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(visionShader, softnessLoc, &softness, SHADER_UNIFORM_FLOAT);
+
+    BeginBlendMode(BLEND_MULTIPLIED);
+        BeginShaderMode(visionShader);
+            Rectangle src = { 0.0f, 0.0f, (float)lightMask.texture.width, -(float)lightMask.texture.height };
+            DrawTextureRec(lightMask.texture, src, (Vector2){ 0, 0 }, WHITE);
+        EndShaderMode();
+    EndBlendMode();
+
 
     int screenWidth = VIRTUAL_WIDTH;
     int screenHeight = VIRTUAL_HEIGHT;
@@ -87,24 +137,23 @@ void GameOverScreen::draw() {
 
     int buttonY = screenHeight / 2 + 30;
     Color lobbyColor = (selectedOption == 0) ? WHITE : DARKGRAY;
-    DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, lobbyColor);
-
+    Color lobbyTextColor = (selectedOption == 0) ? BLACK : WHITE;
 
     DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, lobbyColor);
 
     std::string lobbyText = backToLobbyPressed ? "WAITING..." : "BACK TO LOBBY";
     int lobbyTextWidth = MeasureText(lobbyText.c_str(), 20);
-    DrawText(lobbyText.c_str(), buttonX + (buttonWidth / 2 - lobbyTextWidth / 2), buttonY + (buttonHeight / 2 - 10), 20, WHITE);
+    DrawText(lobbyText.c_str(), buttonX + (buttonWidth / 2 - lobbyTextWidth / 2), buttonY + (buttonHeight / 2 - 10), 20, lobbyTextColor);
 
 
     int buttonExitY = buttonY + 70;
 
 
     Color exitColor = (selectedOption == 1) ? WHITE : DARKGRAY;
-
+    Color exitTextColor = (selectedOption == 1) ? BLACK : WHITE;
     DrawRectangle(buttonX, buttonExitY, buttonWidth, buttonHeight, exitColor);
 
-    std::string exitText = "EXIT GAME";
+    std::string exitText = "BACK TO MENU";
     int exitTextWidth = MeasureText(exitText.c_str(), 20);
-    DrawText(exitText.c_str(), buttonX + (buttonWidth / 2 - exitTextWidth / 2), buttonExitY + (buttonHeight / 2 - 10), 20, WHITE);
+    DrawText(exitText.c_str(), buttonX + (buttonWidth / 2 - exitTextWidth / 2), buttonExitY + (buttonHeight / 2 - 10), 20, exitTextColor);
 }
