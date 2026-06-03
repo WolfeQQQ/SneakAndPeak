@@ -95,9 +95,18 @@ AppState InGameScreen::update(){
         }
         gameTimer = packet.timer;
         
-        if (packet.stage == GameState::GAME_OVER) {
+        currentGameState = packet.stage;
+        if (currentGameState == GameState::GAME_OVER) {
             return AppState::GAME_OVER;
         }
+        
+        if (previousGameState != GameState::COUNTDOWN && currentGameState == GameState::COUNTDOWN){
+            showReveal = true;
+            revealTimer = 4.0f;
+        }
+
+        previousGameState = currentGameState;
+
     }
 
     // Update player animations based on the received game state
@@ -140,6 +149,13 @@ AppState InGameScreen::update(){
 
         }
 
+    }
+
+    if(showReveal){
+        revealTimer -= GetFrameTime();
+        if(revealTimer <= 0.0f){
+            showReveal = false;
+        }
     }
     
     camera.target = (Vector2){std::round(myPlayer.getX()) + PLAYER_WIDTH/2, std::round(myPlayer.getY())+PLAYER_LENGTH/2}; // Update the camera target
@@ -255,7 +271,6 @@ void InGameScreen::draw(){
                 DrawText(std::to_string(players[i].getId()).c_str(), std::round(players[i].getX()), std::round(players[i].getY()) - 20, 10, WHITE);
             }
 
-
         }
 
     EndMode2D();
@@ -296,6 +311,61 @@ void InGameScreen::draw(){
     DrawText("Stamina: ", 10, 10, 20,WHITE);
     DrawRectangle(10,40, myPlayer.getStamina() * 2, 20, GREEN);
     DrawRectangleLines(10,40, 200, 20, WHITE);
-    DrawText(std::to_string(gameTimer).c_str(),VIRTUAL_WIDTH/2 - 25, 20, 20, WHITE);
+    
+
+    // New Clock Logic
+    int remainingTime = (int) gameTimer;
+    int minutes = remainingTime / 60;
+    int seconds = remainingTime % 60;
+    const char* timeText = TextFormat("%0d:%02d",minutes, seconds);
+    Color timeColor = WHITE;
+    int fontSize = 50;
+    if(gameTimer <= 20 && currentGameState != GameState::LOBBY){
+        timeColor = RED;
+        float blink = gameTimer - remainingTime;
+        fontSize += (int)(20.0f * blink);
+    }
+    DrawText(timeText,VIRTUAL_WIDTH/2 - MeasureText(timeText, fontSize)/2, 40, fontSize, timeColor);
+
+    // Show the client's fps
+    DrawFPS(VIRTUAL_WIDTH - 90, 10);
+
+    if (showReveal) {
+        float alpha = 1.0f;
+        float fadeDuration = 0.5f;
+        float maxTimer = 4.0f;
+
+        if (revealTimer > maxTimer - fadeDuration) {
+            alpha = (maxTimer - revealTimer) / fadeDuration;
+        } 
+        else if (revealTimer < fadeDuration) {
+            alpha = revealTimer / fadeDuration;
+        }
+
+        if (alpha < 0.0f) alpha = 0.0f;
+        if (alpha > 1.0f) alpha = 1.0f;
+
+        DrawRectangle(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, Fade(BLACK, 0.925f * alpha));
+        
+        bool amISeeker = myPlayer.getIsSeeker();
+
+        const char* roleText = amISeeker ? "YOU ARE THE SEEKER" : "YOU ARE A HIDER";
+        Color roleColor = amISeeker ? RED : SKYBLUE;
+
+        const char* subText = amISeeker ? "Hunt them down before the time runs out!" : "Blend in and survive!";
+        
+        int textWidth = MeasureText(roleText, 80);
+        int subWidth = MeasureText(subText, 30);
+        
+        DrawText(roleText, VIRTUAL_WIDTH/2 - textWidth/2, VIRTUAL_HEIGHT/2 - 120, 80, Fade(roleColor, alpha));
+        DrawText(subText, VIRTUAL_WIDTH/2 - subWidth/2, VIRTUAL_HEIGHT/2 - 30, 30, Fade(LIGHTGRAY, alpha));
+        
+        Texture2D roleTex = amISeeker ? seekerIdleTexture : playerIdleTexture;
+        Rectangle source = {0, 0, PLAYER_FRAME_SIZE, PLAYER_FRAME_SIZE};
+
+        Rectangle dest = { (float)VIRTUAL_WIDTH/2 - 64, (float)VIRTUAL_HEIGHT/2 + 20, 128, 128 }; 
+        DrawTexturePro(roleTex, source, dest, (Vector2){0,0}, 0.0f, Fade(WHITE, alpha));
+    }
+
    
 }

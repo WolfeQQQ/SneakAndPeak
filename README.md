@@ -110,3 +110,5 @@ Sneak & Peak is divided into three main components:
 * [x] *UI overhaul*
 * [ ] *Audio & sfx*
 * [ ] *Proper Game Over screen*
+* [ ] *Better feedback for failed server connection*
+* [ ] *Tutorial*

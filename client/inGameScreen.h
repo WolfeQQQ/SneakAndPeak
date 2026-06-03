@@ -61,7 +61,11 @@ class InGameScreen : public Screen {
         int ResolutionLoc;  
         int radiusLoc;      
         int softnessLoc;   
-        
+
+        GameState currentGameState;
+        GameState previousGameState = GameState::LOBBY;
+        bool showReveal;
+        float revealTimer = 0.0f;
         GameStatePacket lastPacket;
 
     public:
