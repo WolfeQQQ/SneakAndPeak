@@ -15,11 +15,11 @@
   <img src="screenshots/MainMenu.png" width="45%" alt="Animated Main Menu">
   &nbsp;<img src="screenshots/Gameplay.png" width="45%" alt="Gameplay">
   &nbsp;<img src="screenshots/Dead.png" width="45%" alt="Bro fell asleep...">
+  &nbsp;<img src="screenshots/Role.png" width="45%" alt="Bro fell asleep...">
 
 </div>
 
 <br>
-
 
 > A fast-paced, 2D multiplayer stealth & hide-and-seek game built entirely from scratch.  
 
@@ -38,17 +38,13 @@
 * **Pixel-Art Esthetics:** Smooth tilemap rendering with animated character sprites.
 
 
-
-
 ## Controls 
 
 | Key | Action |
 | :---: | :--- |
 | `W` `A` `S` `D` | Move character | 
-| `L-SHIFT` | Sprint (consumes stamina) | 
+| `L-SHIFT` | Sprint / Radar| 
 | `ENTER` | Select in menu | 
-| `ESC` | Exit game / Disconnect | 
-
 
 
 ## Requirements | Dependecies
@@ -59,7 +55,6 @@
 * **Raylib** (Graphics framework)
 * **Eigen3** (Matrix & math library)
 * **Make** (Build system)
-
 
 
 ## Build & Run 
@@ -103,10 +98,12 @@ Sneak & Peak is divided into three main components:
 
 **Currently working on / Planned features:**
 
-
 * [x] Dynamic Lighting
 * [x] Animated Main Menu
 * [x] Basic TCP Client/Server synchronization
-* [ ] *UI overhaul*
+* [x] *UI overhaul*
+* [x] *Tutorial*
+* [x] *Better feedback for failed server connection*
+* [x] *Proper Game Over screen*
 * [ ] *Audio & sfx*
-* [ ] *Proper Game Over screen*
+* [ ] *Windows Support*

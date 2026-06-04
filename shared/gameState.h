@@ -13,4 +13,5 @@ struct GameStatePacket {
     GameState stage;
     float timer;
     player players[MAX_CLIENTS];
+    int victoryType;
 };

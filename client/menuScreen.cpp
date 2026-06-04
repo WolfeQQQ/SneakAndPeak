@@ -6,8 +6,6 @@
 #include "raylib.h"
 
 
-#define MENU_CSV_PATH "assets/Menu.csv"
-
 //Constructor initializes textures, shaders etc. for the menu screen
 MenuScreen::MenuScreen() {
     // Load textures for the animated menu
@@ -17,7 +15,12 @@ MenuScreen::MenuScreen() {
     menuMap.load(MENU_CSV_PATH, TILESET_PATH, TILE_SIZE);
 
     // Prepare the canvas for dynamic lighting effect
-    lightMask = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
+    lightMask = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+    // Fix for the first frame blink
+    BeginTextureMode(lightMask); 
+        ClearBackground((Color){ 30, 30, 40, 255 }); 
+    EndTextureMode();
 
     // Prepare the shader for the dynamic lighting effect 
     visionShader = LoadShader(0, VISION_SHADER_PATH);
@@ -25,12 +28,13 @@ MenuScreen::MenuScreen() {
     ResolutionLoc = GetShaderLocation(visionShader, "resolution");
     radiusLoc = GetShaderLocation(visionShader, "radius");
     softnessLoc = GetShaderLocation(visionShader, "softness");
-    float resolution[2] = {(float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
+
+    float resolution[2] = {(float)VIRTUAL_WIDTH, (float)VIRTUAL_HEIGHT};
     SetShaderValue(visionShader, ResolutionLoc, resolution, SHADER_UNIFORM_VEC2); // Set the resolution uniform in the shader because it doesn't change
 
     camera = { 0 };
     camera.target = (Vector2){10.0f * TILE_SIZE, 10.0f *TILE_SIZE}; // Lock the camera for better appearance
-    camera.offset = (Vector2){SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f};
+    camera.offset = (Vector2){VIRTUAL_WIDTH/2.0f, VIRTUAL_HEIGHT/2.0f};
     camera.rotation = 0.0f;
     camera.zoom = CAMERA_ZOOM;
 
@@ -53,8 +57,10 @@ MenuScreen::MenuScreen() {
     }
     
     // Set the player coordinates to the first waypoint
-    menuPlayer.setX(waypoints[0].x);
-    menuPlayer.setY(waypoints[0].y);
+    int startPos = rand() % gridWaypoints.size();
+    currentWaypoint = startPos;
+    menuPlayer.setX(waypoints[startPos].x);
+    menuPlayer.setY(waypoints[startPos].y);
 
     menuPlayer.setDirection(player::Direction::LEFT);
     menuPlayer.setPlayerState(player::PlayerState::WALK);
@@ -75,25 +81,28 @@ MenuScreen::~MenuScreen() {
 AppState MenuScreen::update(){
 
     // Input Handling
-    if (IsKeyPressed(KEY_DOWN)){
+    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)){
         selectedOption = (selectedOption - 1 < 0) ? optionsCount - 1 : selectedOption - 1;
     }
-    if(IsKeyPressed(KEY_UP)){
+    if(IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)){
         selectedOption = (selectedOption + 1) % optionsCount;
     }
 
     if (IsKeyPressed(KEY_ENTER)){
         switch (selectedOption){
             case 0:
-                return AppState::CONNECTING;
+                return AppState::LOBBY;
                 break;
             case 1:   
                 return AppState::EXIT;      
                 break;
             case 2: 
-                //
+                return AppState::SETTINGS;
                 break;
         }
+    }
+    if (IsKeyPressed(KEY_T)){
+        return AppState::TUTORIAL;
     }
 
     // Animations update
@@ -140,11 +149,7 @@ AppState MenuScreen::update(){
         }
 
     }
-    return AppState::MAIN_MENU; // Stay on the main menu if no option is selected
-}
 
-// Renders the Main menu
-void MenuScreen::draw(){
 
     BeginTextureMode(lightMask);
 
@@ -187,6 +192,13 @@ void MenuScreen::draw(){
         EndMode2D();
     EndTextureMode();
 
+
+    return AppState::MAIN_MENU; // Stay on the main menu if no option is selected
+}
+
+// Renders the Main menu
+void MenuScreen::draw(){
+
     BeginMode2D(camera);
 
         menuMap.draw();
@@ -215,7 +227,7 @@ void MenuScreen::draw(){
     Vector2 wPlayerPos = {menuPlayer.getX()+PLAYER_WIDTH/2, menuPlayer.getY()+PLAYER_LENGTH/2}; // World position of the player, used for shader calculations
     Vector2 screenPlayerPos = GetWorldToScreen2D(wPlayerPos, camera); // Convert the world position to screen coordinates
 
-    float playerPos[2] = {screenPlayerPos.x, (float)SCREEN_HEIGHT- screenPlayerPos.y};
+    float playerPos[2] = {screenPlayerPos.x, (float)VIRTUAL_HEIGHT - screenPlayerPos.y};
     float radiusUniform = VISION_RADIUS;
     float softness = VISION_SOFTNESS;
     
@@ -236,20 +248,29 @@ void MenuScreen::draw(){
     //UI ELEMENTS 
 
     // Colors for the currently selected and non-selected options
-    Color startColor = (selectedOption == 0) ? LIGHTGRAY : DARKGRAY; 
-    Color exitColor = (selectedOption == 1) ? LIGHTGRAY : DARKGRAY; 
-    Color settingsColor = (selectedOption == 2) ? LIGHTGRAY : DARKGRAY;
-    
-    DrawText("SNEAK&PEAK", 100, SCREEN_HEIGHT / 2 - 300, 100, WHITE); // TODO - center text properly
-    
-    DrawRectangle(100, 200, 300, 75, startColor); 
-    DrawText("Start Game", 110, 220, 30, BLACK);   // TODO -  Buttons too...
-    
-    DrawRectangle(100, 320, 300, 75, settingsColor);
-    DrawText("Settings", 110, 340, 30, BLACK);
+    Color b1 = (selectedOption == 0) ? WHITE : DARKGRAY; 
+    Color b2 = (selectedOption == 1) ? WHITE : DARKGRAY; 
+    Color b3 = (selectedOption == 2) ? WHITE : DARKGRAY;
 
-    DrawRectangle(100, 440, 300, 75, exitColor);
-    DrawText("Exit", 110, 460, 30, BLACK);
+    Color c1 = (selectedOption == 0) ? BLACK : WHITE;
+    Color c2 = (selectedOption == 1) ? BLACK : WHITE; 
+    Color c3 = (selectedOption == 2) ? BLACK : WHITE;
 
+    
+    DrawText("SNEAK&PEAK", 100, VIRTUAL_HEIGHT/ 2 - 300, 100, WHITE); // TODO - center text properly
+    
+    DrawRectangle(100, 200, 300, 75, b1); 
+    DrawText("Start Game", 110, 220, 30, c1);   // TODO -  Buttons too...
+    
+    DrawRectangle(100, 320, 300, 75, b3);
+    DrawText("Settings", 110, 340, 30, c3);
+
+    DrawRectangle(100, 440, 300, 75, b2);
+    DrawText("Exit", 110, 460, 30, c2);
+
+    DrawText("Need Help?", VIRTUAL_WIDTH - MeasureText("Need Help?",20) - 10, VIRTUAL_HEIGHT - 50, 20,WHITE);
+    DrawText("Press [T] to access the tutorial", VIRTUAL_WIDTH - MeasureText("Press [T] to access the tutorial",20) - 10, VIRTUAL_HEIGHT - 25, 20,WHITE);
+
+    DrawText("v1.0", VIRTUAL_WIDTH - MeasureText("v1.0",20) - 10, 5, 20, WHITE );
     //TODO COORDINATES AND SIZE ADJUSTMENTS
 }

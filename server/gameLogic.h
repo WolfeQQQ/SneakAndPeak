@@ -14,6 +14,7 @@ class GameServer;
 class gameLogic
 {
 public:
+    int currentVictoryType = 0; // 0 - null, 1 - Seeker, 2 - Hiders
     /**
      * @brief Construct a new game Logic object. Initializes random seed and default times.
      */
@@ -44,6 +45,7 @@ public:
      * @return false if game tick operates successfully.
      */
     bool gameTick(player players[4], GameServer* server);
+    void reset();
 
 private:
     std::chrono::steady_clock::time_point startTime;
@@ -123,5 +125,7 @@ private:
     bool isWalkable(int tileId);
 
     void runRadar(player currentPlyaer, player players[4]);
+
+
 };
 
