@@ -101,6 +101,9 @@ AppState MenuScreen::update(){
                 break;
         }
     }
+    if (IsKeyPressed(KEY_T)){
+        return AppState::TUTORIAL;
+    }
 
     // Animations update
     float deltaTime = GetFrameTime();
@@ -244,10 +247,6 @@ void MenuScreen::draw(){
     //UI ELEMENTS
     //UI ELEMENTS 
 
-    int startX = 100;
-    int startY = 200;
-    int spacing = 120;
-
     // Colors for the currently selected and non-selected options
     Color b1 = (selectedOption == 0) ? WHITE : DARKGRAY; 
     Color b2 = (selectedOption == 1) ? WHITE : DARKGRAY; 
@@ -269,5 +268,9 @@ void MenuScreen::draw(){
     DrawRectangle(100, 440, 300, 75, b2);
     DrawText("Exit", 110, 460, 30, c2);
 
+    DrawText("Need Help?", VIRTUAL_WIDTH - MeasureText("Need Help?",20) - 10, VIRTUAL_HEIGHT - 50, 20,WHITE);
+    DrawText("Press [T] to access the tutorial", VIRTUAL_WIDTH - MeasureText("Press [T] to access the tutorial",20) - 10, VIRTUAL_HEIGHT - 25, 20,WHITE);
+
+    DrawText("v1.0", VIRTUAL_WIDTH - MeasureText("v1.0",20) - 10, 5, 20, WHITE );
     //TODO COORDINATES AND SIZE ADJUSTMENTS
 }
