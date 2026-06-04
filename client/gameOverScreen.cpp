@@ -66,9 +66,13 @@ AppState GameOverScreen::update(){
         }
     }
     GameStatePacket packet;
-    if (network != nullptr && network->ReceiveState(packet)) {
-        if (packet.stage == GameState::LOBBY) {
-            return AppState::LOBBY;
+    if (network != nullptr) {
+
+        network->ReceiveState(packet);
+        
+
+        if (!network->IsConnected()) {
+            return AppState::CONNECTING;
         }
     }
 

@@ -62,6 +62,12 @@ void GameServer::Stop() {
 //Handling and assigning parameters of the client that is trying to connect
 void GameServer::HandleNewConnection(int clientSock){
     std::lock_guard<std::mutex> lock(stateMutex);
+
+    if (currentState != GameState::LOBBY) {
+        close(clientSock);
+        return;
+    }
+
     int assignedId = -1;
     for(int i = 0 ; i < MAX_CLIENTS; i++){
         if(players[i].getIsConnected()!=true){
@@ -190,9 +196,13 @@ void GameServer::GameUpdateLoop() {
                 }
 
                 if(connectedPlayers == 0){
-                    std::cout << "closing server all players left\n";
-                    Stop();
-                    break;
+                    std::cout << "All players left.\n";
+                    currentState = GameState::LOBBY;
+                    logic->reset();
+                    for (int i = 0; i < MAX_CLIENTS; i++) {
+                        if (clientSockets[i] > 0) shutdown(clientSockets[i], SHUT_RDWR);
+                    }
+                    continue;
                 }
 
                 if(voteBackToLobby){
@@ -201,12 +211,18 @@ void GameServer::GameUpdateLoop() {
 
                     logic->reset();
 
+                    if(voteBackToLobby){
+                    std::cout << "Koniec gry - restart serwera i zrywanie polaczen\n";
+                    currentState = GameState::LOBBY;
+                    
+                    logic->reset();
+
                     for (int i = 0; i < MAX_CLIENTS; i++) {
-                        if (players[i].getIsConnected()) {
-                            resetPlayer(i);
-                            players[i].setIsConnected(true);
+                        if (players[i].getIsConnected() && clientSockets[i] > 0) {
+                            shutdown(clientSockets[i], SHUT_RDWR);
                         }
                     }
+                }
                 }
             }
             
@@ -233,6 +249,7 @@ void GameServer::StateToUpload(){
     GameStatePacket packet;
     packet.stage = currentState;
     packet.timer = logic->getTimeForPlayers();
+    packet.victoryType = logic->currentVictoryType;
     std::memcpy(packet.players, players, sizeof(players));
 
     for(int i = 0; i < MAX_CLIENTS; i++){

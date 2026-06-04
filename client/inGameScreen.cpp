@@ -88,6 +88,7 @@ AppState InGameScreen::update(){
 
     // Retrieve the current game state from the server
     if(network ->ReceiveState(packet)){
+        lastPacket = packet;
         for(int i = 0; i < MAX_CLIENTS; i++){
             players[i] = packet.players[i];
         }
