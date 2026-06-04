@@ -381,6 +381,14 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             }
 
             timeForPlayers = LOBBY_TIME - globalTime;
+
+            if(globalTime > LOBBY_TIME && connectedPlayers < 2) {
+                startTime = currentTime;
+                globalTime = 0.0f;
+                timeForPlayers = LOBBY_TIME;
+                break;
+            }
+            
             if(connectedPlayers < 4 && globalTime <= LOBBY_TIME) break;
 
             stageStarted = false;
