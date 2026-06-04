@@ -372,32 +372,34 @@ void InGameScreen::draw(){
             DrawRectangleLinesEx({ 20, 100, 20, (float)barHeight }, 2, barColor);
         }
         else{
-            int barHeight = VIRTUAL_HEIGHT - 200;
+            if(myPlayer.getPlayerState() != player::PlayerState::DEATH){
+                int barHeight = VIRTUAL_HEIGHT - 200;
             
-            float percentage = (10.0f - abilityCooldown) / 10.0f;
-            if (percentage < 0.0f) percentage = 0.0f;
-            if (percentage > 1.0f) percentage = 1.0f;
+                float percentage = (10.0f - abilityCooldown) / 10.0f;
+                if (percentage < 0.0f) percentage = 0.0f;
+                if (percentage > 1.0f) percentage = 1.0f;
 
-            Color barColor = WHITE;
-            Color outlineColor = LIGHTGRAY;
+                Color barColor = WHITE;
+                Color outlineColor = LIGHTGRAY;
 
-            if (myPlayer.getIsViewing()) {
-                percentage = 0.0f; 
-                float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
-                outlineColor = Fade(RED, pulse); 
-            }
-            else if (abilityCooldown <= 0.0f) {
-                float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
-                barColor = Fade(LIME, pulse);
-                outlineColor = barColor; 
-            }
+                if (myPlayer.getIsViewing()) {
+                    percentage = 0.0f; 
+                    float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
+                    outlineColor = Fade(RED, pulse); 
+                }
+                else if (abilityCooldown <= 0.0f) {
+                        float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
+                    barColor = Fade(LIME, pulse);
+                    outlineColor = barColor; 
+                }
 
-            int fill = (int)(barHeight * percentage);
-            int fillY = 100 + (barHeight - fill); 
+                int fill = (int)(barHeight * percentage);
+                int fillY = 100 + (barHeight - fill); 
         
-            DrawRectangle(20, 100, 20, barHeight, BLACK);
-            DrawRectangle(20, fillY, 20, fill, barColor);
-            DrawRectangleLinesEx({ 20, 100, 20, (float)barHeight }, 2, outlineColor);
+                DrawRectangle(20, 100, 20, barHeight, BLACK);
+                DrawRectangle(20, fillY, 20, fill, barColor);
+                DrawRectangleLinesEx({ 20, 100, 20, (float)barHeight }, 2, outlineColor);
+        }
         }
 
     }
