@@ -14,6 +14,7 @@ class GameServer;
 class gameLogic
 {
 public:
+    int currentVictoryType = 0; // 0 - null, 1 - Seeker, 2 - Hiders
     /**
      * @brief Construct a new game Logic object. Initializes random seed and default times.
      */

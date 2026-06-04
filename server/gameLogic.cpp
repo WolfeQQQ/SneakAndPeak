@@ -267,6 +267,7 @@ void gameLogic::collision(player& currentPlayer, player players[4], player::Dire
     for(int i = 0; i < 4; i++) {
         if(&currentPlayer == &players[i]) continue;
         if(players[i].getPlayerState() == player::PlayerState::DEATH) continue;
+        if(!players[i].getIsConnected()) continue;
 
         float otherX = players[i].getX(), otherY = players[i].getY() + 10;
 
@@ -433,6 +434,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
             
             //next stage (if game lasts more than 3 minutes or every hider is caught)
             if(globalTime > GAME_TIME || caughtPlayers + 1 == connectedPlayers) {
+                currentVictoryType = 1;
                 stageStarted = false;
                 server->setGameStage(GameState::GAME_OVER);
             }
@@ -444,6 +446,7 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
 
             if(globalTime > GAME_OVER_TIME) {
                 // server->setIsRunning(false);
+                currentVictoryType = 2;
                 break;
             }
             break;    
@@ -475,7 +478,7 @@ void gameLogic::reset() {
 
     bool crashFlag = loadMap();
     if(crashFlag) {
-        std::cout << "[CRITICAL ERROR] Blad przeladowania mapy podczas restartu!\n";
+        std::cout << "[CRITICAL ERROR]\n";
     }
 
 
@@ -486,6 +489,6 @@ void gameLogic::reset() {
     timeForPlayers = LOBBY_TIME; 
     globalTime = 0.0f;       
     seekerIndex = -1; 
+    currentVictoryType = 0;
     
-    std::cout << "[GameLogic] Pomyslnie zresetowano zegary i przeladowano mape do stanu LOBBY!\n";
 }
