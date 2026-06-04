@@ -26,6 +26,7 @@ class LobbyScreen : public Screen {
 
         int active = 0;
         int frameCounter = 0;
+        float errorTimer = 0.0f;
 
     public:
         LobbyScreen();
@@ -46,6 +47,7 @@ class LobbyScreen : public Screen {
         // Getters for the GameApp class
         std::string getIP() const { return ipInput; }
         int getPort() const { return std::stoi(portInput); }
+        void setError() { errorTimer = 3.0f; }
 
 
 };

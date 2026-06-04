@@ -176,6 +176,6 @@ void SettingsScreen::draw() {
     DrawRectangleRec(exit, b3);
     DrawText("Back to menu", startX +20, exit.y + 20, 30, c3);
 
-    DrawText("[Enter] - Apply", VIRTUAL_WIDTH - MeasureText("[Enter] - Apply",20) - 5, VIRTUAL_HEIGHT - 20, 20, WHITE);
+    DrawText("[Enter] - Apply", VIRTUAL_WIDTH - MeasureText("[Enter] - Apply",20) - 10, VIRTUAL_HEIGHT - 25, 20, WHITE);
 
 }

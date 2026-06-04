@@ -184,11 +184,14 @@ AppState InGameScreen::update(){
     wasUsingAbility = myPlayer.getIsViewing() ? true : false;
     
     camera.target = (Vector2){std::round(myPlayer.getX()) + PLAYER_WIDTH/2, std::round(myPlayer.getY())+PLAYER_LENGTH/2}; // Update the camera target
-
+    
+    
     BeginTextureMode(lightMask);
 
         ClearBackground((Color){ 30, 30, 40, 255 }); // Clears the BG with a dark color to create the shadow effect
-
+        bool shouldCast = true; 
+        if (myPlayer.getIsSeeker() && currentGameState == GameState::COUNTDOWN ) shouldCast = false;
+        if(shouldCast){
         BeginMode2D(camera);
             Vector2 center = {myPlayer.getX() + PLAYER_WIDTH/2, myPlayer.getY() + PLAYER_LENGTH/2};
           
@@ -221,9 +224,10 @@ AppState InGameScreen::update(){
                 DrawTriangle(center, points[i+1], points[i], WHITE);
             }
             DrawTriangle(center, points[0], points.back(), WHITE);
-
         EndMode2D();
+        }
     EndTextureMode();
+        
 
     return AppState::IN_GAME; 
 }
@@ -404,7 +408,7 @@ void InGameScreen::draw(){
         objectiveText = "WAITING FOR PLAYERS...";
     }
     else if (currentGameState == GameState::COUNTDOWN){
-        objectiveText = "MATCH STARTING...";
+        objectiveText = myPlayer.getIsSeeker() ? "THEY CANNOT HIDE." : "FIND A HIDING SPOT!";
     }
     else if (currentGameState == GameState::GAME){
             objectiveText = myPlayer.getIsSeeker() ? "OBJECTIVE: HUNT THEM ALL" : "OBJECTIVE: SURVIVE";
@@ -452,7 +456,6 @@ void InGameScreen::draw(){
     if (showReveal) {
         float alpha = 1.0f;
         float fadeDuration = 0.5f;
-        float maxTimer = 4.0f;
 
         if (revealTimer < fadeDuration) {
             alpha = revealTimer / fadeDuration;

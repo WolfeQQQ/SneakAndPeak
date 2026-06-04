@@ -5,6 +5,7 @@
 #include "gameOverScreen.h"
 #include "settingsScreen.h"
 #include "lobbyScreen.h"
+#include "tutorialScreen.h"
 // #include more_screens
 #include <cmath>
 
@@ -151,9 +152,10 @@ void GameApp::applyPendingState() {
          // State that attempts to conect to the server, if successful, starts the game.
             std::string IP = SERVER_IP;
             int port = SERVER_PORT;
+            LobbyScreen* lobby = nullptr;
 
             if(currentScreen){
-                auto lobby = dynamic_cast<LobbyScreen*>(currentScreen.get());
+                lobby = dynamic_cast<LobbyScreen*>(currentScreen.get());
                 if (lobby) {
                     IP = lobby->getIP();
                     port = lobby->getPort();
@@ -165,8 +167,13 @@ void GameApp::applyPendingState() {
                 changeState(AppState::IN_GAME);
             } 
             else {
-                changeState(AppState::MAIN_MENU);
-                //changeState(AppState::DISCONNECTED);
+                if (lobby) {
+                    lobby->setError(); 
+                    currentState = AppState::LOBBY;
+                    pendingState = AppState::LOBBY;
+                } else {
+                    changeState(AppState::MAIN_MENU);
+                }
             }
             break;
         }
@@ -192,7 +199,9 @@ void GameApp::applyPendingState() {
         case AppState::SETTINGS:
             currentScreen = std::make_unique<SettingsScreen>();
             break;
-        
+        case AppState::TUTORIAL:
+            currentScreen = std::make_unique<TutorialScreen>();
+            break;
     }
 }
 
