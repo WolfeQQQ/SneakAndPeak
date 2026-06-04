@@ -434,15 +434,20 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
 
             if(!seekerOnline){
                 std::cout << "Seeker left the game. Hiders win. \n";
-
+                currentVictoryType = 2;
                 server->setGameStage(GameState::GAME_OVER);
                 stageStarted = false;
                 break;
             }
             
             //next stage (if game lasts more than 3 minutes or every hider is caught)
-            if(globalTime > GAME_TIME || caughtPlayers + 1 == connectedPlayers) {
+            if(caughtPlayers + 1 == connectedPlayers) {
                 currentVictoryType = 1;
+                stageStarted = false;
+                server->setGameStage(GameState::GAME_OVER);
+            }
+            else if(globalTime > GAME_TIME){
+                currentVictoryType = 2;
                 stageStarted = false;
                 server->setGameStage(GameState::GAME_OVER);
             }
@@ -454,7 +459,6 @@ float gameLogic::updateStateAndGetDelta(player players[4], GameServer* server) {
 
             if(globalTime > GAME_OVER_TIME) {
                 // server->setIsRunning(false);
-                currentVictoryType = 2;
                 break;
             }
             break;    
