@@ -134,13 +134,5 @@ private:
      */
     bool isWalkable(int tileId);
 
-    /**
-     * @brief Executes the radar logic for a player (Seeker) to detect nearby Hiders.
-     * @param currentPlyaer The player object using the radar.
-     * @param players Array of all players in the game to check distances against.
-     */
-    void runRadar(player currentPlyaer, player players[4]);
-
-
 };
 
