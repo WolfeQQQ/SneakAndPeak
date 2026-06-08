@@ -1,6 +1,7 @@
 #include "lobbyScreen.h"
 #include "../shared/contstants.h"
 #include <iostream>
+#include <math.h>
 
 LobbyScreen :: LobbyScreen(){
     bgMap.load(MENU_CSV_PATH, TILESET_PATH, TILE_SIZE);
@@ -32,7 +33,10 @@ LobbyScreen :: ~LobbyScreen(){
 }
 
 AppState LobbyScreen :: update(){
-    frameCounter ++;
+    frameCounter++;
+    if (errorTimer > 0.0f) {
+        errorTimer -= GetFrameTime();
+    }
 
     if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) active = (active + 1) % 4;
     if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) active = (active - 1 < 0) ? 3 : active - 1;
@@ -41,7 +45,7 @@ AppState LobbyScreen :: update(){
         int key = GetCharPressed();
         while(key > 0){
             //ip
-            if(active == 0 && (key >= 48 && key <= 57) || key == 46 ){ // Data vaidation
+            if(active == 0 && ((key >= 48 && key <= 57) || key == 46 )){ // Data vaidation
                 if(ipInput.length() < 15) ipInput += (char)key;
             }
             //port
@@ -127,6 +131,14 @@ void LobbyScreen :: draw(){
     DrawRectangleLines(startX, startY + spacing + 40, 300,50, c2);
     DrawText(portInput.c_str(), startX + 10, startY + spacing + 50, 30, c2);
     if (active == 1 && (frameCounter / 20) % 2 == 0) DrawText(" |", startX + 10 + MeasureText(portInput.c_str(), 30), startY + spacing + 50, 30, c2);
+
+    if (errorTimer > 0.0f) {
+        float alpha = 1.0f;
+        if (errorTimer < 1.0f) alpha = errorTimer;
+        DrawRectangle(VIRTUAL_WIDTH/2 - MeasureText("CONNECTION FAILED!",40) / 2 - 50, VIRTUAL_HEIGHT/2 - 40, MeasureText("CONNECTION FAILED!",40) + 100, 100, Fade(BLACK,alpha) );
+        DrawText("CONNECTION FAILED!", VIRTUAL_WIDTH/2 - MeasureText("CONNECTION FAILED!",40) / 2, VIRTUAL_HEIGHT/2-10 , 40, Fade(RED, alpha));
+    }
+
 
     Rectangle connect = {(float)startX, (float)startY + 2*spacing, 300,75};
     DrawRectangleRec(connect, b3);

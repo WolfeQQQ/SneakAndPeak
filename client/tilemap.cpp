@@ -66,8 +66,8 @@ void Tilemap::draw() {
 
     int perRow = tileSet.width / tileSize;  // Calculate how many tiles fit in one row of the texture
 
-    for(int y = 0; y < mapData.size(); y++){
-        for(int x = 0; x < mapData[y].size(); x++){
+    for(size_t y = 0; y < mapData.size(); y++){
+        for(size_t x = 0; x < mapData[y].size(); x++){
             int tileID = mapData[y][x];
 
             if(tileID < 0){
@@ -108,7 +108,7 @@ bool Tilemap::isSolid(float x, float y){
     if (tileY < 0 || tileY >= mapData.size()) return true;
     if (tileX < 0 || tileX >= mapData[tileY].size()) return true;
 
-    return isWall(mapData[tileY][tileX]); // For now, only 'id = -1' is considered a non-solid tile
+    return isWall(mapData[tileY][tileX]); 
 }
 
 bool Tilemap::isWall(int tileId) {

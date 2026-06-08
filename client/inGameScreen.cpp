@@ -185,11 +185,14 @@ AppState InGameScreen::update(){
     wasUsingAbility = myPlayer.getIsViewing() ? true : false;
     
     camera.target = (Vector2){std::round(myPlayer.getX()) + PLAYER_WIDTH/2, std::round(myPlayer.getY())+PLAYER_LENGTH/2}; // Update the camera target
-
+    
+    
     BeginTextureMode(lightMask);
 
         ClearBackground((Color){ 30, 30, 40, 255 }); // Clears the BG with a dark color to create the shadow effect
-
+        bool shouldCast = true; 
+        if (myPlayer.getIsSeeker() && currentGameState == GameState::COUNTDOWN ) shouldCast = false;
+        if(shouldCast){
         BeginMode2D(camera);
             Vector2 center = {myPlayer.getX() + PLAYER_WIDTH/2, myPlayer.getY() + PLAYER_LENGTH/2};
           
@@ -222,9 +225,10 @@ AppState InGameScreen::update(){
                 DrawTriangle(center, points[i+1], points[i], WHITE);
             }
             DrawTriangle(center, points[0], points.back(), WHITE);
-
         EndMode2D();
+        }
     EndTextureMode();
+        
 
     return AppState::IN_GAME; 
 }
@@ -368,32 +372,34 @@ void InGameScreen::draw(){
             DrawRectangleLinesEx({ 20, 100, 20, (float)barHeight }, 2, barColor);
         }
         else{
-            int barHeight = VIRTUAL_HEIGHT - 200;
+            if(myPlayer.getPlayerState() != player::PlayerState::DEATH){
+                int barHeight = VIRTUAL_HEIGHT - 200;
             
-            float percentage = (10.0f - abilityCooldown) / 10.0f;
-            if (percentage < 0.0f) percentage = 0.0f;
-            if (percentage > 1.0f) percentage = 1.0f;
+                float percentage = (10.0f - abilityCooldown) / 10.0f;
+                if (percentage < 0.0f) percentage = 0.0f;
+                if (percentage > 1.0f) percentage = 1.0f;
 
-            Color barColor = WHITE;
-            Color outlineColor = LIGHTGRAY;
+                Color barColor = WHITE;
+                Color outlineColor = LIGHTGRAY;
 
-            if (myPlayer.getIsViewing()) {
-                percentage = 0.0f; 
-                float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
-                outlineColor = Fade(RED, pulse); 
-            }
-            else if (abilityCooldown <= 0.0f) {
-                float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
-                barColor = Fade(LIME, pulse);
-                outlineColor = barColor; 
-            }
+                if (myPlayer.getIsViewing()) {
+                    percentage = 0.0f; 
+                    float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
+                    outlineColor = Fade(RED, pulse); 
+                }
+                else if (abilityCooldown <= 0.0f) {
+                        float pulse = 0.6f + (sin(GetTime() * 15.0f) * 0.4f);
+                    barColor = Fade(LIME, pulse);
+                    outlineColor = barColor; 
+                }
 
-            int fill = (int)(barHeight * percentage);
-            int fillY = 100 + (barHeight - fill); 
+                int fill = (int)(barHeight * percentage);
+                int fillY = 100 + (barHeight - fill); 
         
-            DrawRectangle(20, 100, 20, barHeight, BLACK);
-            DrawRectangle(20, fillY, 20, fill, barColor);
-            DrawRectangleLinesEx({ 20, 100, 20, (float)barHeight }, 2, outlineColor);
+                DrawRectangle(20, 100, 20, barHeight, BLACK);
+                DrawRectangle(20, fillY, 20, fill, barColor);
+                DrawRectangleLinesEx({ 20, 100, 20, (float)barHeight }, 2, outlineColor);
+        }
         }
 
     }
@@ -405,7 +411,7 @@ void InGameScreen::draw(){
         objectiveText = "WAITING FOR PLAYERS...";
     }
     else if (currentGameState == GameState::COUNTDOWN){
-        objectiveText = "MATCH STARTING...";
+        objectiveText = myPlayer.getIsSeeker() ? "THEY CANNOT HIDE." : "FIND A HIDING SPOT!";
     }
     else if (currentGameState == GameState::GAME){
             objectiveText = myPlayer.getIsSeeker() ? "OBJECTIVE: HUNT THEM ALL" : "OBJECTIVE: SURVIVE";
@@ -453,7 +459,6 @@ void InGameScreen::draw(){
     if (showReveal) {
         float alpha = 1.0f;
         float fadeDuration = 0.5f;
-        float maxTimer = 4.0f;
 
         if (revealTimer < fadeDuration) {
             alpha = revealTimer / fadeDuration;
