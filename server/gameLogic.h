@@ -45,6 +45,10 @@ public:
      * @return false if game tick operates successfully.
      */
     bool gameTick(player players[4], GameServer* server);
+
+    /**
+     * @brief Resets the game logic state to its initial parameters for a new round.
+     */
     void reset();
 
 private:
@@ -122,8 +126,19 @@ private:
      */
     bool loadMap();
 
+    /**
+     * @brief Checks if a specific tile allows player movement.
+     * @param tileId The identifier of the tile to check.
+     * @return true if the tile is walkable.
+     * @return false if the tile is an obstacle or wall.
+     */
     bool isWalkable(int tileId);
 
+    /**
+     * @brief Executes the radar logic for a player (Seeker) to detect nearby Hiders.
+     * @param currentPlyaer The player object using the radar.
+     * @param players Array of all players in the game to check distances against.
+     */
     void runRadar(player currentPlyaer, player players[4]);
 
 
