@@ -105,17 +105,47 @@ public:
     std::mutex& getMutex() { return stateMutex; }
 
     // Getters and Setters
+
+    /**
+     * @brief Retrieves the current state/stage of the game.
+     * @return GameState The current game state.
+     */
     GameState getGameStage() const { return currentState; }
+    
+    /**
+     * @brief Sets the current state/stage of the game.
+     * @param stage The new game state to apply.
+     */
     void setGameStage(GameState stage) { currentState = stage; }
+    
+    /**
+     * @brief Gets the timer value for the current game stage.
+     * @return float The stage timer in seconds.
+     */
     float getStageTimer() const { return stateTimer; }
+    
+    /**
+     * @brief Sets the timer value for the current game stage.
+     * @param time The time to set in seconds.
+     */
     void setStageTimer(float time) { stateTimer = time; }
+
+    /**
+     * @brief Sets the running status of the server.
+     * @param running Boolean flag indicating if the server loop should continue running.
+     */
     void setIsRunning(bool running){  isRunning = running; }
+    
     /**
      * @brief Reinitializes player positions, flags, and cleans the associated memory allocations upon disconnect or reset.
      * @param playerId Assigned system indexing identifier of the player.
      */
     void resetPlayer(int playerId);
 
+    /**
+     * @brief Assigns initial spawn coordinates on the map for a specific player.
+     * @param playerId The unique identifier of the player to spawn.
+     */
     void spawnPoints(int playerId);
 
 
